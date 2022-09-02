@@ -1,21 +1,7 @@
 # field-map-odk
 Utilities to create ODK assets for field mapping
 
-ODK now has a Select From File (Map) function.
-
-This is great, but it requires the person creating the ODK project to specify the map file the person will be selecting from (OMK didn't require this---the mapper could just grab OSM data from their phone---but that came with a tradeoff: it inherently limited OMK to using OSM data; no other kind of map data could be used).
-
-This is a set of utility scripts to automate the process of
-
-- Taking a particular mapper's ID (probably OSM ID)
-- Taking the Area of Interest that they will be mapping
-- Downloading the relevant features from OSM and creating a point GeoJSON file for them
-- Creating a form from a template for that mapper, refering to the relevant GeoJSON file
-- Pushing the form and GeoJSON file to a specified ODK project
-- Creating an app user for the mapper with view permission for the relvant form
-- Returning a QR code for that app user
-
-## Users
+# Users
 ## Campaign managers
 Campaign managers select an Area of Interest (AOI) and organize field mappers to go out and collect data. They need to:
 - Select an AOI polygon by creating a GeoJSON or by tracing a polygon in a Web map
@@ -42,29 +28,43 @@ Validators review the data collected by field mappers and assess its quality. If
 
 The basic setup here is:
 
-- An ODK Central server which functions as the back end for the field data collectors' ODK Collect apps on their Android phones. Devs must have access to an ODK Central server with a username and password granting admin credentials.
-  - [Here are the instructions for setting up an ODK Central server on Digital Ocean](https://docs.getodk.org/central-install-digital-ocean/) (it's very similar on AWS or whatever)
-- A computer-screen-optimized web app that allows campaign managers to:
-  - Select AOIs
-  - Choose task-splitting schemes
-  - Provide instructions and guidance specific to the project
-  - View areas that are at various stages of completion
-  - Provide a project-specific URL that field mappers can access from their mobile phones to select and map tasks.
-- A back end that converts the project parameters into a corresponding ODK Central project. This must:
-  - Convert the AOI into a bounding box
-  - Download the OSM features that will be mapped in that bounding box (buildings and/or amenities) as well as the OSM features 
-  - Trim the features within the bounding box but outside the AOI polygon
-  - Convert the polygon features into centroid points (needed because ODK select from map doesn't yet deal with polygons; it will in future)
-  - Use line features as cutlines to create individual tasks (squares don't make sense for field mapping, neighborhoods delineated by large roads, watercourses, and railways do)
-  - Split the AOI into those tasks
-  - Use the ODK Central API to create:
-    - A project for the whole AOI
-    - Forms for each split task
-    - GeoJSON feature collections for each form
-    - An App User for each form
-  - Grab the settings (and QR codes) for each app user and forward them to the task selection Web app.
-  
+## ODK Collect
+A mobile data collection tool that functions on almost all Android phones. Field mappers use ODK Collect to select features such as buildings or amenities, and fill out forms with survey questions to collect attributes or data about those features (normally at least some of these attributes are intended to become OSM tags associated with those features).
 
+The ODK Collect app connects to a back-end server (in this case ODK Central), which provides the features to be mapped and the survey form definitions. 
 
+## ODK Central server
+An ODK Central server which functions as the back end for the field data collectors' ODK Collect apps on their Android phones. Devs must have access to an ODK Central server with a username and password granting admin credentials.
+
+[Here are the instructions for setting up an ODK Central server on Digital Ocean](https://docs.getodk.org/central-install-digital-ocean/) (it's very similar on AWS or whatever)
+
+## Field Mapping Tasking Manager Web App
+The FMTM web app is a Python/Flask/Leaflet app that serves as a front end for the ODK Central server, using the [ODK Central API](https://odkcentral.docs.apiary.io/#) to allocate specific areas/features to individual mappers, and receive their data submissions.
+
+### Manager Web Interface (with PC browser-friendlymap view)
+
+A computer-screen-optimized web app that allows Campaign Managers to:
+- Select AOIs
+- Choose task-splitting schemes
+- Provide instructions and guidance specific to the project
+- View areas that are at various stages of completion
+- Provide a project-specific URL that field mappers can access from their mobile phones to select and map tasks.
+
+### FMTM back end
+A back end that converts the project parameters entered by the Campaign Manager in the Manager Web Interface into a corresponding ODK Central project. Its functions include:
+- Convert the AOI into a bounding box and corresponding Overpass API query
+- Download (using the Overpass API) the OSM features that will be mapped in that bounding box (buildings and/or amenities) as well as the OSM line features that will be used as cutlines to subdivide the area
+- Trim the features within the bounding box but outside the AOI polygon
+- Convert the polygon features into centroid points (needed because ODK select from map doesn't yet deal with polygons; this is likely to change in the future but for now we'll work with points only)
+- Use line features as cutlines to create individual tasks (squares don't make sense for field mapping, neighborhoods delineated by large roads, watercourses, and railways do)
+- Split the AOI into those tasks based on parameters set in the Manager Web Interface (number of features or area per task, splitting strategy, etc).
+- Use the ODK Central API to create, on the associated ODK Central server:
+  - A project for the whole AOI
+  - One survey form for each split task (neighborhood)
+  - GeoJSON feature collections for each form (the buildings/amenities or whatever)
+  - An App User for each form, which in turn corresponds to a single task. When the ODK Collect app on a user's phone is configured to function as that App User, they have access to *only* the form and features/area of that task.
+  - A set of QR Codes and/or configuration files/strings for ODK Collect, one for each App User
+
+### Field Mapper Web Interface (with mobile-friendly map view)
   - Ideally with a link that opens ODK Collect directly from the browser, but if that's hard, the fallback is downloading a QR code and importing it into ODK Collect.
 
