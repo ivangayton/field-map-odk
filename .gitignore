@@ -26,7 +26,7 @@ odk2odm_venv/
 # PyCharm
 .idea/
 
-# test scripts
+# test scripts and files
 test
 
 # Images
