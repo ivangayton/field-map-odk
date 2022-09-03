@@ -47,12 +47,12 @@ echo version of pygdal compatible with the specific GDAL installed.
 gdalversion=$(gdal-config --version)
 echo $gdalversion
 GDALERROR=$((pip install pygdal==$gdalversion) 2>&1)
-echo $GDALERROR
+# echo $GDALERROR
 python3 parse_pip_error.py "$GDALERROR" "$gdalversion"
 pygdalversion=$(<pygdalversion.txt)
 echo
 echo installing pygdal version $pygdalversion
-pip install pygdal==$pygdalversion
+pip install pygdal==$pygdalversion >> logs/setup.log 2>> logs/error.log
 rm pygdalversion.txt
 
 echo installing postgres from default Ubuntu repo
