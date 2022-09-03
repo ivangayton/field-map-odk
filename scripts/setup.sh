@@ -45,12 +45,15 @@ if [ -x psql ]
 then
     echo Postgres already installed
 else
-    echo  was not installed, probably installing
+    echo  Postgres was not installed, probably installing
     sudo apt install -y postgresql postgresql-contrib libpq-dev >> logs/setup.log 2>> logs/error.log
 
 fi
 
+echo installing postgis
 sudo apt install postgis postgresql-14-postgis-3 >> logs/setup.log 2>> logs/error.log
+
+echo starting postgresql service
 sudo systemctl start postgresql.service
 
 # TODO This is a pretty obvious password (it's md5 hashed).
