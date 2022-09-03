@@ -40,16 +40,18 @@ fi
 sudo apt install -y postgresql postgresql-contrib libpq-dev >> logs/setup.log 2>> logs/error.log
 sudo systemctl start postgresql.service
 
-echo Creating postgres user fmtmk
 # TODO This is a pretty obvious password (it's md5 hashed).
+# TODO would be better to use SHA256 anyway
 # Generate another one using bash:
 # echo -n passwordusername | md5sum
 # and paste the result into the following command
 # with the prefix 'md5' (the hash below begins with 540e)
+echo Creating role (postgres user) fmtm
 sudo -u postgres psql -c "CREATE ROLE fmtm WITH PASSWORD 'md5540e7aa2739a14c6f2e6f07fd09c67f1';"
+echo Giving fmtm login rights
 sudo -u postgres psql -c "ALTER ROLE fmtm WITH LOGIN"
+echo Giving fmtm superuser rights
 sudo -u postgres psql -c "ALTER ROLE fmtm WITH SUPERUSER"
-
 echo Creating database fmtm
 sudo -u postgres psql -c "CREATE DATABASE fmtm WITH OWNER fmtm;"
 
