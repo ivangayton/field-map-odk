@@ -8,7 +8,7 @@ if [ -x $pip3 ]
 then
     echo pip3 already installed
 else
-    echo it was not installed, probably installing
+    echo pip3 was not installed, probably installing
     sudo apt install python3-pip -y >> logs/setup.log 2>> logs/error.log
 fi
 
@@ -26,18 +26,21 @@ fi
 source venv/bin/activate
 echo Installing Wheel on venv python I guess
 pip install wheel >> logs/setup.log 2>> logs/error.log
+sudo apt install python3-pip -y >> logs/setup.log 2>> logs/error.log
 
-echo installing and starting postgres from default Ubuntu repo
+echo installing postgres from default Ubuntu repo
 echo as per https://www.digitalocean.com/community/tutorials/how-to-install-postgresql-on-ubuntu-22-04-quickstart
 
 if [ -x $psql ]
 then
-    echo Installing Postgres
+    echo Postgres already installed
 else
-    echo it was not installed, probably installing
-    sudo apt install python3-pip -y >> logs/setup.log 2>> logs/error.log
+    echo  was not installed, probably installing
+    sudo apt install -y postgresql postgresql-contrib libpq-dev >> logs/setup.log 2>> logs/error.log
+
 fi
-sudo apt install -y postgresql postgresql-contrib libpq-dev >> logs/setup.log 2>> logs/error.log
+
+sudo apt install postgis postgresql-14-postgis-3 >> logs/setup.log 2>> logs/error.log
 sudo systemctl start postgresql.service
 
 # TODO This is a pretty obvious password (it's md5 hashed).
@@ -56,6 +59,8 @@ echo Giving fmtm superuser rights
 sudo -u postgres psql -c "ALTER ROLE fmtm WITH SUPERUSER"
 echo Creating database fmtm
 sudo -u postgres psql -c "CREATE DATABASE fmtm WITH OWNER fmtm;"
+echo creating postgis extension
+sudo -u fmtm psql -c "CREATE EXTENSION postgis;"
 
 echo Done.
 echo To use the utilities here, activate the virtual environment with:
