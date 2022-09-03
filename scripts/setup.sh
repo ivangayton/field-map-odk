@@ -40,7 +40,7 @@ pip install wheel >> logs/setup.log 2>> logs/error.log
 sudo apt install python3-pip -y >> logs/setup.log 2>> logs/error.log
 
 echo installing GDAL
-sudo apt install -y libgdal-dev >> logs/setup.log 2>> logs/error.log
+sudo apt install -y gdal-bin libgdal-dev >> logs/setup.log 2>> logs/error.log
 echo setting up python hooks for GDAL, pygdal.
 echo Doing so via a horrible hack using a Python script to extract the latest
 echo version of pygdal compatible with the specific GDAL installed. 
