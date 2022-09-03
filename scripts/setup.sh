@@ -11,6 +11,7 @@ then
     echo nginx is already installed
 else
     echo installing nginx because why not
+    sudo apt install nginx
 fi
 
 echo making sure we have pip3 and venv
