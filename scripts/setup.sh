@@ -51,7 +51,7 @@ else
 fi
 
 echo installing postgis
-sudo apt install postgis postgresql-14-postgis-3 >> logs/setup.log 2>> logs/error.log
+sudo apt install -y postgis postgresql-14-postgis-3 >> logs/setup.log 2>> logs/error.log
 
 echo starting postgresql service
 sudo systemctl start postgresql.service
