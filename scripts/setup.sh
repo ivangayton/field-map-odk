@@ -46,7 +46,7 @@ sudo systemctl start postgresql.service
 # echo -n passwordusername | md5sum
 # and paste the result into the following command
 # with the prefix 'md5' (the hash below begins with 540e)
-echo Creating role (postgres user) fmtm
+echo Creating role postgres user fmtm
 sudo -u postgres psql -c "CREATE ROLE fmtm WITH PASSWORD 'md5540e7aa2739a14c6f2e6f07fd09c67f1';"
 echo Giving fmtm login rights
 sudo -u postgres psql -c "ALTER ROLE fmtm WITH LOGIN"
