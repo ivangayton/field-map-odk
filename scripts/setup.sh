@@ -3,7 +3,7 @@
 echo making sure we have pip3 and venv
 if [ -x $pip3 ]
 then
-    echo setting up virtualenv if not already present
+    echo setting up pip3
 else
     echo it was not installed, probably installing
     sudo apt install python3-pip
@@ -24,8 +24,9 @@ pip3 install virtualenv
 source venv/bin/activate
 pip install wheel
 
-echo installing odk2odm library and dependencies
-pip install .
+echo installing
+
+
 
 echo Done.
 echo To use the utilities here, activate the virtual environment with:
