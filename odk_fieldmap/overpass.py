@@ -45,9 +45,9 @@ def osm_json_to_geojson(infile):
     except Exception as e:
         print(e)
         
-def centroid_and_merge_to_points(geojson):
+def centroid_and_merge_to_points(geojson_in, geojson_out):
     """Accept a GeoJSON file containing polygons and points, 
-    return a geopackage containing only points with centroids for polygons.
+    return a GeoJSON containing only points with centroids for polygons.
     Lines are ignored.
     """
     pass

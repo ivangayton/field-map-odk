@@ -48,12 +48,18 @@ gdalversion=$(gdal-config --version)
 echo $gdalversion
 GDALERROR=$((pip install pygdal==$gdalversion) 2>&1)
 # echo $GDALERROR
-python3 parse_pip_error.py "$GDALERROR" "$gdalversion"
+python3 scripts/parse_pip_error.py "$GDALERROR" "$gdalversion"
 pygdalversion=$(<pygdalversion.txt)
 echo
 echo installing pygdal version $pygdalversion
 pip install pygdal==$pygdalversion >> logs/setup.log 2>> logs/error.log
 rm pygdalversion.txt
+
+echo installing nodejs and npm
+sudo apt install -y nodejs npm >> logs/setup.log 2>> logs/error.log
+echo installing osmtogeojson 
+sudo npm install -g osmtogeojson >> logs/setup.log 2>> logs/error.log
+
 
 echo installing postgres from default Ubuntu repo
 echo as per https://www.digitalocean.com/community/tutorials/how-to-install-postgresql-on-ubuntu-22-04-quickstart
