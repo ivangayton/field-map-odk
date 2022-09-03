@@ -6,10 +6,10 @@ then
     echo setting up pip3
 else
     echo it was not installed, probably installing
-    sudo apt install python3-pip
+    sudo apt install python3-pip -y
 fi
 
-sudo apt install python3-venv
+sudo apt install python3-venv -y
 
 if [ -d venv ]
 then
@@ -24,8 +24,10 @@ pip3 install virtualenv
 source venv/bin/activate
 pip install wheel
 
-echo installing
-
+echo installing and starting postgres from default Ubuntu repo
+echo as per https://www.digitalocean.com/community/tutorials/how-to-install-postgresql-on-ubuntu-22-04-quickstart
+sudo apt install -y postgresql postgresql-contrib
+sudo systemctl start postgresql.service
 
 
 echo Done.
