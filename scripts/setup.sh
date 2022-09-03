@@ -3,6 +3,13 @@
 # Crash Bash on error
 # set -e
 
+if [ -x nginx ]
+then
+    echo nginx is already installed
+else
+    echo installing nginx because why not
+fi
+
 echo making sure we have pip3 and venv
 if [ -x $pip3 ]
 then
