@@ -11,7 +11,7 @@ else
 fi
 
 echo making sure we have pip3 and venv
-if [ -x $pip3 ]
+if [ -x pip3 ]
 then
     echo pip3 already installed
 else
@@ -38,7 +38,7 @@ sudo apt install python3-pip -y >> logs/setup.log 2>> logs/error.log
 echo installing postgres from default Ubuntu repo
 echo as per https://www.digitalocean.com/community/tutorials/how-to-install-postgresql-on-ubuntu-22-04-quickstart
 
-if [ -x $psql ]
+if [ -x psql ]
 then
     echo Postgres already installed
 else
