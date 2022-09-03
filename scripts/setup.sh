@@ -1,31 +1,42 @@
 #!/bin/bash
 
+# Crash Bash on error
+set -e
+
 echo making sure we have pip3 and venv
 if [ -x $pip3 ]
 then
-    echo setting up pip3
+    echo pip3 already installed
 else
     echo it was not installed, probably installing
     sudo apt install python3-pip -y >> logs/setup.log 2>> logs/error.log
 fi
 
-sudo apt install python3-venv -y >> logs/setup.log 2>> logs/error.log
-
+echo Installing Wheel on base python I guess
+pip3 install wheel >> logs/setup.log 2>> logs/error.log
+pip3 install virtualenv >> logs/setup.log 2>> logs/error.log
 if [ -d venv ]
 then
     echo venv was already present, hope it is the right one
 else
+    echo Installing venv
+    sudo apt install python3-venv -y >> logs/setup.log 2>> logs/error.log
     python3 -m venv venv
 fi
-
-echo creating and activating virtual environment
-pip3 install wheel >> logs/setup.log 2>> logs/error.log
-pip3 install virtualenv >> logs/setup.log 2>> logs/error.log
 source venv/bin/activate
+echo Installing Wheel on venv python I guess
 pip install wheel >> logs/setup.log 2>> logs/error.log
 
 echo installing and starting postgres from default Ubuntu repo
 echo as per https://www.digitalocean.com/community/tutorials/how-to-install-postgresql-on-ubuntu-22-04-quickstart
+
+if [ -x $psql ]
+then
+    echo Installing Postgres
+else
+    echo it was not installed, probably installing
+    sudo apt install python3-pip -y >> logs/setup.log 2>> logs/error.log
+fi
 sudo apt install -y postgresql postgresql-contrib libpq-dev >> logs/setup.log 2>> logs/error.log
 sudo systemctl start postgresql.service
 
