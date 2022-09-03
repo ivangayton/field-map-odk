@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Crash Bash on error
-set -e
+# set -e
 
 echo making sure we have pip3 and venv
 if [ -x $pip3 ]
