@@ -39,6 +39,22 @@ echo Installing Wheel on venv python I guess
 pip install wheel >> logs/setup.log 2>> logs/error.log
 sudo apt install python3-pip -y >> logs/setup.log 2>> logs/error.log
 
+echo installing GDAL
+sudo apt install -y libgdal-dev >> logs/setup.log 2>> logs/error.log
+echo setting up python hooks for GDAL, pygdal.
+echo Doing so via a horrible hack using a Python script to extract the latest
+echo version of pygdal compatible with the specific GDAL installed. 
+gdalversion=$(gdal-config --version)
+echo $gdalversion
+GDALERROR=$((pip install pygdal==$gdalversion) 2>&1)
+echo $GDALERROR
+python3 parse_pip_error.py "$GDALERROR" "$gdalversion"
+pygdalversion=$(<pygdalversion.txt)
+echo
+echo installing pygdal version $pygdalversion
+pip install pygdal==$pygdalversion
+rm pygdalversion.txt
+
 echo installing postgres from default Ubuntu repo
 echo as per https://www.digitalocean.com/community/tutorials/how-to-install-postgresql-on-ubuntu-22-04-quickstart
 
@@ -48,7 +64,6 @@ then
 else
     echo  Postgres was not installed, probably installing
     sudo apt install -y postgresql postgresql-contrib libpq-dev >> logs/setup.log 2>> logs/error.log
-
 fi
 
 echo installing postgis
