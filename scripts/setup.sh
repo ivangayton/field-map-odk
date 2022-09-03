@@ -6,10 +6,10 @@ then
     echo setting up pip3
 else
     echo it was not installed, probably installing
-    sudo apt install python3-pip -y >> setup.log 2>> error.log
+    sudo apt install python3-pip -y >> logs/setup.log 2>> logs/error.log
 fi
 
-sudo apt install python3-venv -y >> setup.log 2>> error.log
+sudo apt install python3-venv -y >> logs/setup.log 2>> logs/error.log
 
 if [ -d venv ]
 then
@@ -19,14 +19,14 @@ else
 fi
 
 echo creating and activating virtual environment
-pip3 install wheel >> setup.log 2>> error.log
-pip3 install virtualenv >> setup.log 2>> error.log
+pip3 install wheel >> logs/setup.log 2>> logs/error.log
+pip3 install virtualenv >> logs/setup.log 2>> logs/error.log
 source venv/bin/activate
-pip install wheel >> setup.log 2>> error.log
+pip install wheel >> logs/setup.log 2>> logs/error.log
 
 echo installing and starting postgres from default Ubuntu repo
 echo as per https://www.digitalocean.com/community/tutorials/how-to-install-postgresql-on-ubuntu-22-04-quickstart
-sudo apt install -y postgresql postgresql-contrib libpq-dev >> setup.log 2>> error.log
+sudo apt install -y postgresql postgresql-contrib libpq-dev >> logs/setup.log 2>> logs/error.log
 sudo systemctl start postgresql.service
 
 echo Creating postgres user fmtmk
