@@ -20,7 +20,6 @@ venv/
 
 __pycache__
 credentials.txt
-example_files
 odk2odm_venv/
 
 # PyCharm
