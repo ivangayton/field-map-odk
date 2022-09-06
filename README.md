@@ -61,7 +61,7 @@ A back end that converts the project parameters entered by the Campaign Manager 
 - Use the ODK Central API to create, on the associated ODK Central server:
   - A project for the whole AOI
   - One survey form for each split task (neighborhood)
-    - This might require modifying the xlsforms (to update the version ID of the forms and change the name of the geography file being referred to). This is pretty straightforward using [Python's XlsxWriter](https://xlsxwriter.readthedocs.io/), though we have to be careful to keep the location within the spreadsheet of these two items consistent.
+    - This might require modifying the xlsforms (to update the version ID of the forms and change the name of the geography file being referred to). This is pretty straightforward using [OpenPyXL](https://openpyxl.readthedocs.io/en/stable/), though we have to be careful to keep the location within the spreadsheet of these two items consistent.
   - GeoJSON feature collections for each form (the buildings/amenities or whatever)
   - An App User for each form, which in turn corresponds to a single task. When the ODK Collect app on a user's phone is configured to function as that App User, they have access to *only* the form and features/area of that task.
   - A set of QR Codes and/or configuration files/strings for ODK Collect, one for each App User
