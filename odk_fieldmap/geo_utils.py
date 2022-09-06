@@ -3,6 +3,7 @@
 Various utilities for using GDAL in python
 """
 import sys, os
+import subprocess
 
 from osgeo import ogr
 
@@ -85,10 +86,25 @@ def make_centroids(infile):
         centroid = geom.Centroid()
         outFeature.SetGeometry(centroid)
         outLayer.CreateFeature(outFeature)
-    
 
-
-        
+def osm_json_to_geojson(infile):
+    """Accept a raw JSON file of data from an Overpass API query.
+    Return a GeoJSON string of the same data, after converting all polygons
+    to points. USING THE NODE MODULE FROM OVERPASS, WHICH MUST BE INSTALLED
+    USING sudo npm install -g osmtogeojson
+    This is because the Python module osm2geojson
+    returns geojson that is unusable in ODK.
+    """
+    try:
+        print(f'Trying to turn {infile} into geojson')
+        p = subprocess.run(["osmtogeojson", infile],
+                           capture_output=True, encoding='utf-8')
+        geojsonstring = p.stdout
+        print(f'The osmtogeojson module accepted {infile} and '\
+              f'returned something of type {type(geojsonstring)}')
+        return geojsonstring
+    except Exception as e:
+        print(e)
         
 def get_geomcollection(infile, extension):
     try:
@@ -110,5 +126,3 @@ def get_geomcollection(infile, extension):
         print('Something went wrong with the ogr driver')
         print(e)
         exit(1)
-
-    

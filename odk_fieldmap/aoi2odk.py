@@ -5,9 +5,8 @@ import json
 
 from geo_utils import get_extent_bbox
 from geo_utils import make_centroids
+from geo_utils import osm_json_to_geojson
 from overpass import query
-
-from osm2geojson import json2geojson
     
 def get_buildings(aoi_file):
     """
@@ -24,9 +23,9 @@ def get_buildings(aoi_file):
     overpass_url = ('https://overpass.kumi.systems'
                     '/api/interpreter')
     overpass_json = query(querystring, overpass_url)
-    return json2geojson(overpass_json)
+    return overpass_json
 
-def aoi2project(AOIfile, formfile):
+def aoi2project(AOIfile):
     """
     Takes a GeoJSON file with an aoi polygon, creates
     - A GeoJSON of all the OSM building polygons in it
@@ -35,10 +34,18 @@ def aoi2project(AOIfile, formfile):
     """
     (AOIpath, ext) = os.path.splitext(AOIfile)
     buildings = get_buildings(AOIfile)
-    buildings_file = AOIpath + '_buildings' + ext
-    with open(buildings_file, 'w') as bf:
-        json.dump(buildings, bf)
-    make_centroids(buildings_file)
+    
+    buildings_json = AOIpath + '_buildings.json'
+    with open(buildings_json, 'w') as bj:
+        json.dump(buildings, bj)
+
+    buildings_geojson = AOIpath + '_buildings.geojson'
+    geojson = osm_json_to_geojson(buildings_json)
+    with open(buildings_geojson, 'w') as of:
+        of.write(geojson)
+    # Use the Node-based osmtogeojson module
+    # Why? Horrifying details in geo_utils docstring
+    make_centroids(buildings_geojson)
 
 if __name__ == "__main__":
     """
@@ -48,5 +55,4 @@ if __name__ == "__main__":
     of the AOI.
     """
     AOIfile = sys.argv[1]
-    formfile = sys.argv[2]
-    aoi2project(AOIfile, formfile)
+    aoi2project(AOIfile)
