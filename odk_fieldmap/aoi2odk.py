@@ -8,27 +8,6 @@ from geo_utils import make_centroids
 from overpass import query
 
 from osm2geojson import json2geojson
-from openpyxl import load_workbook
-
-
-def prep_form(workbookfile, AOIfile, task_id):
-    """
-    Modifies the base instance of an ODK xlsform to refer
-    to a specific area and GeoJSON file of features.
-    N.B. Only works with OSM_Buildings_ODK_v_0-0-6.xlsx
-    """
-    (path, ext) = os.path.splitext(workbookfile)
-    (AOIpath, AOIext) = os.path.splitext(AOIfile)
-    AOIbasename = os.path.splitext(os.path.basename(AOIfile))[0]
-    wb = load_workbook(filename = workbookfile)
-    surveyws = wb['survey']
-    settingws = wb['settings']
-    
-    settingws['A2'] = f'FMTM_{AOIbasename}_{task_id}'
-    settingws['B2'] = f'FMTM_{AOIbasename}_{task_id}'
-    surveyws['A9'] = (f'select_one_from_file '
-                      f'{AOIbasename}_{task_id}{ext}')
-    wb.save(f'{path}_{AOIbasename}_{task_id}{ext}')
     
 def get_buildings(aoi_file):
     """
@@ -61,9 +40,6 @@ def aoi2project(AOIfile, formfile):
         json.dump(buildings, bf)
     make_centroids(buildings_file)
 
-    for i in range(0, 5):
-        prep_form(formfile, AOIfile, i)
-    
 if __name__ == "__main__":
     """
     If run from CLI, attempts to convert a GeoJSON
