@@ -20,7 +20,7 @@ def get_ogr_driver(extension):
     elif extension.lower() == '.gpkg':
         driver = ogr.GetDriverByName('GPKG')
     else:
-        print('Check input file format for {}'.format(infile))
+        print(f'Check input file format for {extension}')
         sys.exit()
     return driver
 
@@ -54,47 +54,41 @@ def get_extent_bbox(infile, extension):
         print(e)
         exit(1)
 
-def get_centroids(geojson):
+def make_centroids(infile):
     """
-    Expects a GeoJSON string of polygons (I know, this is not
-    consistent with the other functions, sue me).
-    Returns a GeoJSON string of centroids.
+    Expects a GeoJSON file of polygons
+    Creates a GeoJSON file of centroids.
     Retains all fields from the original polygon file.
     """
-
-    inDriver = get_ogr_driver('geojson')
-    inDatasource = inDriver.Open(geojson)
+    (infilepath, ext) = os.path.splitext(infile)
+    outfn = (infilepath + '_centroids' + ext)
+    inDriver = get_ogr_driver(ext)
+    inDatasource = inDriver.Open(infile, 0)
     inLayer = inDatasource.GetLayer()
+
+    outDriver = get_ogr_driver('.geojson')
+    outDataSource = outDriver.CreateDataSource(outfn)
+    outLayer = outDataSource.CreateLayer("centroids",
+                                         geom_type=ogr.wkbPoint)
+    # Add input Layer Fields to the output Layer
     inLayerDefn = inLayer.GetLayerDefn()
-
-    outDriver = get_ogr_driver('geojson')
-    outDataSource = outDriver.CreateDataSource(outdata)
-    outLayer = outDataSource.CreateLayer("centroids", geom_type=ogr.wkbPoint)
-    outLayerDefn = outLayer.GetLayerDefn()
-
-    # Get the fields (attributes)
-    inFields = []
     for i in range(0, inLayerDefn.GetFieldCount()):
-        inFields.append(inLayerDefn.GetFieldDefn(i))
-
-    for i in range(0, inlayer.GetFeatureCount()):
-        inFeature = inLayer.GetFeature(i)
+        fieldDefn = inLayerDefn.GetFieldDefn(i)
+        outLayer.CreateField(fieldDefn)
+        
+    outLayerDefn = outLayer.GetLayerDefn()
+    
+    # Add features to the ouput Layer
+    for inFeature in inLayer:
         outFeature = ogr.Feature(outLayerDefn)
-        # TODO add the fields
         geom = inFeature.GetGeometryRef()
         centroid = geom.Centroid()
         outFeature.SetGeometry(centroid)
         outLayer.CreateFeature(outFeature)
-        # Save and close input and output features
-        inFeature = None
-        outFeature = None
-
     
 
-    return
-    
 
-    
+        
         
 def get_geomcollection(infile, extension):
     try:
