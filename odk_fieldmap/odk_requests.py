@@ -87,7 +87,9 @@ def form(base_url, aut, pid, formId):
 
 def form_attachments(base_url, aut, pid, formId):
     """Find out what attachments are expected by the form"""
-    url = f'{base_url}/v1/projects/{pid}/forms/{formId}/draft/attachments'
+    url = (f'{base_url}/v1/projects/{pid}/forms/'
+           f'{formId}/draft/attachments')
+    # TODO: do (may not be necessary but fgood for safety)
 
 def submissions(base_url, aut, pid, formId):
     """Fetch a list of submission instances for a given form."""
@@ -199,15 +201,21 @@ def create_form(base_url, aut, pid, name, form):
            f'?ignoreWarnings=true&publish=false')
     return requests.post(url, auth=aut, data=form, headers=headers)
 
-def push_form_attachments(base_url, aut, pid, name, att):
+def attach_to_form(base_url, aut,
+                   pid, fid, name, att):
     """
     """
-    basename = (os.path.splitext
-                (os.path.basename(form))[0])
+    basename = os.path.basename(name)
+    # TODO it might not always be geojson!
+    # Take the application type as a parameter.
     headers = {
     'Content-Type': 'application/vnd.geo+json',
     }
-    url = f'{base_url}/v1/projects/projectId/forms/xmlFormId/draft/attachments/filename'
+    url = (f'{base_url}/v1/projects/{pid}/forms/'
+           f'{fid}/draft/attachments/{basename}')
+    print('Trying the URL')
+    print(url)
+    
     return requests.post(url, auth=aut, data=att, headers=headers)
 
 
