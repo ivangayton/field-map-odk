@@ -213,11 +213,16 @@ def attach_to_form(base_url, aut,
     }
     url = (f'{base_url}/v1/projects/{pid}/forms/'
            f'{fid}/draft/attachments/{basename}')
-    print('Trying the URL')
-    print(url)
-    
+
     return requests.post(url, auth=aut, data=att, headers=headers)
 
+def publish_form(base_url, aut, pid, fid):
+    """Publish a form thats in draft state on server
+    """
+
+    url = (f'{base_url}/v1/projects/{pid}/forms/'
+           f'{fid}/draft/publish?version=yeahgo')
+    return requests.post(url, auth=aut)
 
 def get_qr_code(base_url, aut, pid, token, admin={}, general=general):
     url = f'{base_url}/v1/key/{token}/projects/{pid}'

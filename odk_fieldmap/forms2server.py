@@ -7,6 +7,7 @@ from odk_requests import project_id
 from odk_requests import create_form
 from odk_requests import forms
 from odk_requests import attach_to_form
+from odk_requests import publish_form
 
 def formdir2project(url, aut, indir):
     """
@@ -47,25 +48,22 @@ def push_forms(url, aut, pid, indir):
     filelist = os.listdir(formdir)
     # keep only the files that are xlsx
     # TODO: Maybe reject all non-point input files
-    forms = [x for x in filelist if
+    forms = [os.path.splitext(x)[0]
+             for x in filelist if
              os.path.splitext(x)[1].lower()
              == '.xlsx']
     print(f'I found {len(forms)} forms to upload')
     for form in forms:
-        formname = (os.path.splitext
-                    (os.path.basename(form))[0])
         print(f'Uploading form {form}.')
-        formpath = os.path.join(formdir, form)
+        formpath = os.path.join(formdir,
+                                f'{form}.xlsx')
         formfile = open(formpath, 'rb')
         formdata = formfile.read()
         rf = create_form(url, aut, pid,
-                        formname, formdata)
+                        form, formdata)
         print(rf)
-    return 'yo'
+    return forms
     
-
-
-
 def push_geojson(url, aut, pid, indir):
     """
     Push all of the geojson attachments to their
@@ -73,7 +71,9 @@ def push_geojson(url, aut, pid, indir):
     The geojson files are expected to be in the 
     geojson subdirectory of the input directory.
     """
-    
+    # TODO loop over the forms instead of the
+    # files in the geojson directory.
+    # Not hugely important but more consistent.
     gjdir = os.path.join(indir, 'geojson')
     filelist = os.listdir(gjdir)
     attments = [x for x in filelist if
@@ -89,7 +89,16 @@ def push_geojson(url, aut, pid, indir):
         
         rg = attach_to_form(url, aut, pid,
                             attname, attment, attdata)
-        print(rg.content)   
+        print(rg)      
+    return 'yo'
+
+def publish_forms(url, aut, pid, forms):
+    """
+    """
+    for form in forms:
+        r = publish_form(url, aut, pid, form)
+        print(r)
+
     
     return 'yo'
 
@@ -110,9 +119,11 @@ if __name__ == '__main__':
     print('\nHere goes nothing.\n')
     pid = formdir2project(url, aut, indir)
     print(f'We have a project with id {pid}.') 
-    whatever = push_forms(url, aut, pid, indir)
-    print(whatever)
+    formlist = push_forms(url, aut, pid, indir)
+    print(formlist)
     whatever = push_geojson(url, aut, pid, indir)
     print(whatever)
+    publish = publish_forms(url, aut, pid, formlist)
+    print(publish)
     
     
