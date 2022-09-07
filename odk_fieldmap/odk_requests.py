@@ -48,13 +48,13 @@ import sys, os
 import requests
 import json
 import zlib
-#import qrcode
 import codecs
 import urllib
 
 general = {
     "form_update_mode": "match_exactly",
     "autosend": "wifi_and_cellular",
+    "basemap_source": "mapbox",
 }
 
 
@@ -69,13 +69,17 @@ def project(base_url, aut, projectId):
     url = f'{base_url}/v1/projects/{projectId}'
     return requests.get(url, auth=aut)
     
-
 def project_id(base_url, aut, projectName):
     """Fetch the id of a project based on the name on an ODK Central server."""
     url = f'{base_url}/v1/projects'
     projects = requests.get(url, auth=aut).json()
     projectId = [p for p in projects if p['name']== projectName][0]['id']
     return projectId
+
+def create_project(base_url, aut, name):
+    """Create a project with the specified name"""
+    url = f'{base_url}/v1/{name}'
+    return requests.post(url, aut)
 
 def forms(base_url, aut, projectId):
     """Fetch a list of forms in a project."""
@@ -84,7 +88,7 @@ def forms(base_url, aut, projectId):
 
 
 def form(base_url, aut, projectId, formId):
-    """Fetch a list of forms in a project."""
+    """Fetch a specific form in a project."""
     url = f'{base_url}/v1/projects/{projectId}/forms/{formId}'
     return requests.get(url, auth=aut)
 
@@ -183,19 +187,19 @@ def delete_project(base_url, aut, project_id):
     url = f'{base_url}/v1/projects/{project_id}'
     return requests.delete(url, auth=aut)
 
-
-def create_form(base_url, aut, projectId, name, data):
+def create_form(base_url, aut, projectId, name, form):
     """Create a new form on an ODK Central server"""
-    # base_name = os.path.basename(path2Form)
-    # file_name = os.path.splitext(base_name)[0]
+    basename = (os.path.splitext
+                (os.path.basename(form))[0])
+    file_name = os.path.splitext(base_name)[0]
     # form_file = open(path2Form, 'rb')
     #sheet = form_file.active
     headers = {
     'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     f'X-XlsForm-FormId-Fallback': name
     }
-    url = f'{base_url}/v1/projects/{projectId}/forms?ignoreWarnings=true&publish=true'
-    # From the requests, gives the same error
+    url = (f'{base_url}/v1/projects/{projectId}'
+           f'/forms?ignoreWarnings=true&publish=true')
     return requests.post(url, auth=aut, data=data, headers=headers)
 
 def get_qr_code(base_url, aut, projectId, token, admin={}, general=general):
