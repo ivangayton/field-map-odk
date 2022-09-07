@@ -63,7 +63,6 @@ def projects(base_url, aut):
     url = f'{base_url}/v1/projects'
     return requests.get(url, auth=aut)
 
-
 def project(base_url, aut, pid):
     """Fetch details of a specific project on an ODK Central server"""
     url = f'{base_url}/v1/projects/{pid}'
@@ -76,22 +75,19 @@ def project_id(base_url, aut, projectName):
     pid = [p for p in projects if p['name']== projectName][0]['id']
     return pid
 
-def create_project(base_url, aut, name):
-    """Create a project with the specified name"""
-    url = f'{base_url}/v1/{name}'
-    return requests.post(url, aut)
-
 def forms(base_url, aut, pid):
     """Fetch a list of forms in a project."""
     url = f'{base_url}/v1/projects/{pid}/forms'
     return requests.get(url, auth=aut)
-
 
 def form(base_url, aut, pid, formId):
     """Fetch a specific form in a project."""
     url = f'{base_url}/v1/projects/{pid}/forms/{formId}'
     return requests.get(url, auth=aut)
 
+def form_attachments(base_url, aut, pid, formId):
+    """Find out what attachments are expected by the form"""
+    url = f'{base_url}/v1/projects/{pid}/forms/{formId}/draft/attachments'
 
 def submissions(base_url, aut, pid, formId):
     """Fetch a list of submission instances for a given form."""
@@ -107,7 +103,6 @@ def app_users(base_url, aut, pid):
     """Fetch a list of app-users."""
     url = f'{base_url}/v1/projects/{pid}/app-users'
     return requests.get(url, auth=aut)
-
 
 # Should work with ?media=false appended but doesn't.
 # Probably a bug in ODK Central. Use the odata version; it works.
@@ -127,13 +122,11 @@ def odata_submissions(base_url, aut, pid, formId):
     submissions = requests.get(url, auth=aut)
     return submissions
 
-
 def attachment_list(base_url, aut, pid, formId, instanceId):
     """Fetch an individual media file attachment."""
     url = f'{base_url}/v1/projects/{pid}/forms/{formId}/submissions/'\
         f'{instanceId}/attachments'
     return requests.get(url, auth=aut)
-
 
 def attachment(base_url, aut, pid, formId, instanceId, filename):
     """Fetch a specific attachment by filename from a submission to a form."""
@@ -141,9 +134,14 @@ def attachment(base_url, aut, pid, formId, instanceId, filename):
         f'{instanceId}/attachments/{filename}'
     return requests.get(url, auth=aut)
 
-# POST 
+# POST
+
 def create_project(base_url, aut, project_name):
     """Create a new project on an ODK Central server"""
+    # TODO definitely should complain if project
+    # already exists. Currently it just creates
+    # another with the same name but a different
+    # project ID.
     url = f'{base_url}/v1/projects'
     return requests.post(url, auth=aut, json={'name': project_name})
 
@@ -188,16 +186,30 @@ def delete_project(base_url, aut, pid):
     return requests.delete(url, auth=aut)
 
 def create_form(base_url, aut, pid, name, form):
-    """Create a new form on an ODK Central server"""
+    """Create a new form on an ODK Central server
+    Does not publish the form because we may need to
+    add attachments, so it must be published later."""
     basename = (os.path.splitext
                 (os.path.basename(form))[0])
     headers = {
     'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     f'X-XlsForm-FormId-Fallback': name
     }
-    url = (f'{base_url}/v1/projects/{pid}'
-           f'/forms?ignoreWarnings=true&publish=true')
+    url = (f'{base_url}/v1/projects/{pid}/forms'
+           f'?ignoreWarnings=true&publish=false')
     return requests.post(url, auth=aut, data=form, headers=headers)
+
+def push_form_attachments(base_url, aut, pid, name, att):
+    """
+    """
+    basename = (os.path.splitext
+                (os.path.basename(form))[0])
+    headers = {
+    'Content-Type': 'application/vnd.geo+json',
+    }
+    url = f'{base_url}/v1/projects/projectId/forms/xmlFormId/draft/attachments/filename'
+    return requests.post(url, auth=aut, data=att, headers=headers)
+
 
 def get_qr_code(base_url, aut, pid, token, admin={}, general=general):
     url = f'{base_url}/v1/key/{token}/projects/{pid}'
@@ -242,24 +254,6 @@ def generate_qr_data_dict(base_url, aut, pid, admin={}, general=general):
 
 # Test QR settings data
 # See here to see all the possible settings: https://docs.getodk.org/collect-import-export/?highlight=configur
-
-# qr_data = {
-#   "general": {
-#     "protocol": "odk_default",
-#     "constraint_behavior": "on_finalize"
-#   },
-#   "admin": {
-#     "edit_saved": false
-#   }
-# }
-# # A QR code from one app user from the website
-# qr_data = {
-#     "general":{
-#         "server_url":"https://3dstreetview.org/v1/key/bm$OwmsI$lYPLjXJyKbSPKmmydD5JuNJH2mwi8$KcUaFVE9EdYiq3mhX4BLDynwH/projects/15",
-#         "form_update_mode":"match_exactly",
-#         "autosend":"wifi_and_cellular"},
-#     "admin":{}
-#     }
 
 
 if __name__ == '__main__':

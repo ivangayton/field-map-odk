@@ -5,16 +5,23 @@ from openpyxl import load_workbook
 
 def task_areas_to_forms(indir, form_template):
     """
-    Accepts a directory full of GeoJSON point files,
+    Accepts a project directory, with a subdirectory
+    called /geojson full of GeoJSON point files,
     each representing an individual task (e.g. a batch
     of buildings or amenities to be visited for data 
     collection) and returns a set of xlsforms, one for
     each task, with the appropriate references in 
     place for the Select from Map question in ODK.
     """
-    filelist = os.listdir(indir)
+    geojsondir = os.path.join(indir, 'geojson')
+    if not os.path.exists(geojsondir):
+        print('Can\'t find geojson subdirectory')
+        # Maybe throw an exception
+    filelist = os.listdir(geojsondir)
     # keep only the files that are GeoJSON
-    # TODO: Maybe reject all non-point input files
+    # TODO: Maybe reject all non-point input files;
+    # kind of a hassle involving a spatial lib
+    # but perhaps worth it
     aois = [x for x in filelist if
             os.path.splitext(x)[1].lower()
             == '.geojson']
@@ -45,7 +52,6 @@ def prep_form(form_template, AOIfile, outdir):
     surveyws['A9'] = (f'select_one_from_file '
                       f'{AOIbasename}{AOIext}')
     outfile = os.path.join(outdir,
-                           f'{form_basename}_'
                            f'{AOIbasename}.xlsx')
     print(f'Writing: {outfile}')
     wb.save(outfile)

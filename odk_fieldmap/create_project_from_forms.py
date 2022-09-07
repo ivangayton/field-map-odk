@@ -56,6 +56,9 @@ def push_forms(url, aut, pid, indir):
         r = create_form(url, aut, pid,
                         formname, formdata)
         print(r)
+        
+
+    
     return 'yo'
 
 if __name__ == '__main__':
