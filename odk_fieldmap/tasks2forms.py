@@ -14,6 +14,7 @@ def task_areas_to_forms(indir, form_template):
     place for the Select from Map question in ODK.
     """
     geojsondir = os.path.join(indir, 'geojson')
+    print(geojsondir)
     if not os.path.exists(geojsondir):
         print('Can\'t find geojson subdirectory')
         # Maybe throw an exception
@@ -27,6 +28,7 @@ def task_areas_to_forms(indir, form_template):
             == '.geojson']
     outdir = os.path.join(indir, 'forms')
     if not os.path.exists(outdir):
+        print(f'Making directory {outdir}')
         os.makedirs(outdir)
     for aoi in aois:
         prep_form(form_template, aoi, outdir)
@@ -40,6 +42,7 @@ def prep_form(form_template, AOIfile, outdir):
     """
     form_basename = os.path.splitext(
         os.path.basename(form_template))[0]
+    print(form_basename)
     (AOIpath, AOIext) = os.path.splitext(AOIfile)
     AOIbasename = os.path.splitext(
         os.path.basename(AOIfile))[0]
@@ -68,4 +71,5 @@ if __name__ == "__main__":
     """
     indir = sys.argv[1]
     formfile = sys.argv[2]
+    print('here goes')
     task_areas_to_forms(indir, formfile)
