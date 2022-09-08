@@ -9,6 +9,8 @@ from odk_requests import forms
 from odk_requests import attach_to_form
 from odk_requests import publish_form
 from odk_requests import create_app_user
+from odk_requests import app_users
+from odk_requests import update_role_app_user
 
 def get_formlist(indir):
     """
@@ -133,7 +135,22 @@ def create_app_users(url, aut, pid, forms):
         print(r)
         
     return 'I guess that might have worked'
-        
+
+def assign_app_users_to_forms(url, aut, pid, forms):
+    # First find the goddamned actorIds for the app users
+    appusers_r = app_users(url, aut, pid)
+    appusers = {}
+    for appuser in appusers_r.json():
+        displayName = appuser['displayName']
+        appuserid = appuser['id']
+        appusers[displayName] = appuserid
+    print('\nShould have the app users in a dict now\n')
+    print(appusers)
+    for form in forms:
+        actorid = appusers[form]
+        print(f'Assigning form {form} to actor {actorid}.')
+        r = update_role_app_user(url, aut, pid, form, actorid, 2)
+        print(r)
 
 if __name__ == '__main__':
     """
@@ -153,21 +170,24 @@ if __name__ == '__main__':
     
     print('\nHere goes nothing.\n')
     formlist = get_formlist(indir)
-    print(f'{formlist}\n')
+    #print(f'{formlist}\n')
     
-    pid = formdir2project(url, aut, indir)
-    print(f'We have a project with id {pid}\n.')
-    
-    yabbity = push_forms(url, aut, pid, indir)
-    print(yabbity)
-    
-    blimey = push_geojson(url, aut, pid, indir)
-    print(blimey)
-    
-    publish = publish_forms(url, aut, pid, formlist)
-    print(publish)
-    pid = 50
-    appusers = create_app_users(url, aut, pid, formlist)
+#    pid = formdir2project(url, aut, indir)
+#    print(f'We have a project with id {pid}\n.')
+#    
+#    yabbity = push_forms(url, aut, pid, indir)
+#    print(yabbity)
+#    
+#    blimey = push_geojson(url, aut, pid, indir)
+#    print(blimey)
+#    
+#    publish = publish_forms(url, aut, pid, formlist)
+#    print(publish)
+#    appusers = create_app_users(url, aut, pid, formlist)
+#
+    pid = 50 ###### DO NOT LEAVE THIS
+    ass = assign_app_users_to_forms(url, aut, pid, formlist)
+    print(ass)
     
     
     

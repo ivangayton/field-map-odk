@@ -136,6 +136,19 @@ def attachment(base_url, aut, pid, formId, instanceId, filename):
         f'{instanceId}/attachments/{filename}'
     return requests.get(url, auth=aut)
 
+def assignments_to_a_form(base_url, aut, pid, fid):
+    """List the actors and assignments on a particular form."""
+    url = (f'{base_url}/v1/projects/{pid}/forms/{fid}/assignments')
+    return requests.get(url, auth=aut)
+
+def all_assignments(base_url, aut):
+    url = (f'{base_url}/v1/assignments')
+    return requests.get(url, auth=aut)
+
+def app_users(base_url, aut, pid):
+    url = (f'{base_url}/v1/projects/{pid}/app-users')
+    return requests.get(url, auth=aut)
+
 # POST
 
 def create_project(base_url, aut, project_name):
@@ -157,12 +170,11 @@ def create_app_user(base_url, aut, pid, app_user_name='Surveyor'):
     url = f'{base_url}/v1/projects/{pid}/app-users'
     return requests.post(url, auth=aut, json={'displayName': app_user_name})
 
-
-def update_role_app_user(base_url, aut, pid, formId, actorId, roleId=2):
+def update_role_app_user(base_url, aut, pid, fid, actorId, roleId=2):
     """Give specified app-user specified role for given project"""
-    url = f'{base_url}/v1/projects/{pid}/forms/{formId}/assignments/{roleId}/{actorId}'
+    url = (f'{base_url}/v1/projects/{pid}/forms/{fid}/'
+           f'assignments/{roleId}/{actorId}')
     return requests.post(url, auth=aut)
-    
 
 def give_access_app_users(base_url, aut, pid, roleId=2):
     """Give all the app-users in the project access to all the forms in that project"""
