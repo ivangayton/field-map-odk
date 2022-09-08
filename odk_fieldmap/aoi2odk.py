@@ -25,6 +25,22 @@ def get_buildings(aoi_file):
     overpass_json = query(querystring, overpass_url)
     return overpass_json
 
+def get_roads(aoi_file):
+    """
+    Given a GeoJSON AOI polygon, returns roads
+    """
+    (infilepath, extension) = os.path.splitext(aoi_file)
+    extent = get_extent_bbox(aoi_file, extension)
+    querystring = (
+        f'[out:json][timeout:200];'
+        f'(wr["highway"]({extent}););'
+        f'out body;>;out body;'
+    )
+    overpass_url = ('https://overpass.kumi.systems'
+                    '/api/interpreter')
+    overpass_json = query(querystring, overpass_url)
+    return overpass_json
+
 def aoi2project(AOIfile):
     """
     Takes a GeoJSON file with an aoi polygon, creates
@@ -46,6 +62,20 @@ def aoi2project(AOIfile):
     # Use the Node-based osmtogeojson module
     # Why? Horrifying details in geo_utils docstring
     make_centroids(buildings_geojson)
+
+    roads = get_roads(AOIfile)
+    
+    roads_json = AOIpath + '_roads.json'
+    with open(roads_json, 'w') as rj:
+        json.dump(roads, rj)
+
+    roads_geojson = AOIpath + '_roads.geojson'
+    geojson = osm_json_to_geojson(roads_json)
+    with open(roads_geojson, 'w') as of:
+        of.write(geojson)
+    # Use the Node-based osmtogeojson module
+    # Why? Horrifying details in geo_utils docstring
+    make_centroids(roads_geojson)
 
 if __name__ == "__main__":
     """
