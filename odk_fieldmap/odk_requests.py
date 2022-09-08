@@ -19,7 +19,7 @@ The aut parameter is a tuple of the username and password used to authenticate t
 Simple usage:
 If you want to see if a server is working and you are able to reach it, use the projects function:
 
-url = 'https://3dstreetview.org'
+url = 'https://3dphotocollect.org'
 aut = ('myusername', 'mypassword')
 r = fetch.projects(url, aut)
 r.status_code
@@ -151,7 +151,8 @@ def create_app_user(base_url, aut, pid, app_user_name='Surveyor'):
     """
     Create a new project on an ODK Central server
 
-    Atm. you can create multiple app users with the same name, should this be possible, or give an error? 
+    Atm. you can create multiple app users with the same name, 
+    this should probably be illegal? 
     """
     url = f'{base_url}/v1/projects/{pid}/app-users'
     return requests.post(url, auth=aut, json={'displayName': app_user_name})
