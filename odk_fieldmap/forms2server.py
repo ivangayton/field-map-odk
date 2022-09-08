@@ -172,20 +172,19 @@ if __name__ == '__main__':
     formlist = get_formlist(indir)
     #print(f'{formlist}\n')
     
-#    pid = formdir2project(url, aut, indir)
-#    print(f'We have a project with id {pid}\n.')
-#    
-#    yabbity = push_forms(url, aut, pid, indir)
-#    print(yabbity)
-#    
-#    blimey = push_geojson(url, aut, pid, indir)
-#    print(blimey)
-#    
-#    publish = publish_forms(url, aut, pid, formlist)
-#    print(publish)
-#    appusers = create_app_users(url, aut, pid, formlist)
-#
-    pid = 50 ###### DO NOT LEAVE THIS
+    pid = formdir2project(url, aut, indir)
+    print(f'We have a project with id {pid}\n.')
+    
+    yabbity = push_forms(url, aut, pid, indir)
+    print(yabbity)
+    
+    blimey = push_geojson(url, aut, pid, indir)
+    print(blimey)
+    
+    publish = publish_forms(url, aut, pid, formlist)
+    print(publish)
+    appusers = create_app_users(url, aut, pid, formlist)
+
     ass = assign_app_users_to_forms(url, aut, pid, formlist)
     print(ass)
     
