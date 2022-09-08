@@ -31,3 +31,7 @@ Token for app user Mikocheni_buildings_133:
 eykXJ2BuFV3ndiBhTxEKVNBsD!Gqrm$oSxHZUdHA1UNtPNeUncVxl41KsqpI3wtw
 
 https://docs.getodk.org/collect-import-export/
+
+Output of a decoded QR code from a working project
+b'{"general":{"server_url":"https://3dphotocollect.org/v1/key/eykXJ2BuFV3ndiBhTxEKVNBsD!Gqrm$oSxHZUdHA1UNtPNeUncVxl41KsqpI3wtw/projects/50","form_update_mode":"match_exactly","autosend":"wifi_and_cellular"},"project":{"name":"Mikocheni"},"admin":{}}'
+
