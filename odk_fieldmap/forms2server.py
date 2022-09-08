@@ -11,6 +11,7 @@ from odk_requests import publish_form
 from odk_requests import create_app_user
 from odk_requests import app_users
 from odk_requests import update_role_app_user
+from odk_requests import qr_code
 
 def get_formlist(indir):
     """
@@ -152,6 +153,27 @@ def assign_app_users_to_forms(url, aut, pid, forms):
         r = update_role_app_user(url, aut, pid, form, actorid, 2)
         print(r)
 
+def fetch_qr_codes(url, aut, pid, forms, indir):
+    pname = (os.path.basename(
+        indir.rstrip(os.path.sep)))
+    qrdir = os.path.join(indir, 'QR_codes')
+    if not os.path.exists(qrdir):
+        os.makedirs(qrdir)
+    # TODO create dir if not already there
+    appusers_r = app_users(url, aut, pid)
+    appusertokens = {}
+    for appuser in appusers_r.json():
+        displayName = appuser['displayName']
+        usertoken = appuser['token']
+        appusertokens[displayName] = usertoken
+    #print(appusertokens)
+    for form in forms:
+        token = appusertokens[form]
+        print(f'Trying to create qr code for {form} with {token}.')
+        r = qr_code(url, aut, pid, pname, form, token, qrdir)
+        print(r)
+    
+        
 if __name__ == '__main__':
     """
     Accepts
@@ -172,21 +194,24 @@ if __name__ == '__main__':
     formlist = get_formlist(indir)
     #print(f'{formlist}\n')
     
-    pid = formdir2project(url, aut, indir)
-    print(f'We have a project with id {pid}\n.')
+#    pid = formdir2project(url, aut, indir)
+#    print(f'We have a project with id {pid}\n.')
+#    
+#    yabbity = push_forms(url, aut, pid, indir)
+#    print(yabbity)
+#    
+#    blimey = push_geojson(url, aut, pid, indir)
+#    print(blimey)
+#    
+#    publish = publish_forms(url, aut, pid, formlist)
+#    print(publish)
+#    appusers = create_app_users(url, aut, pid, formlist)
+#
+#    ass = assign_app_users_to_forms(url, aut, pid, formlist)
+#    print(ass)
+#
     
-    yabbity = push_forms(url, aut, pid, indir)
-    print(yabbity)
-    
-    blimey = push_geojson(url, aut, pid, indir)
-    print(blimey)
-    
-    publish = publish_forms(url, aut, pid, formlist)
-    print(publish)
-    appusers = create_app_users(url, aut, pid, formlist)
-
-    ass = assign_app_users_to_forms(url, aut, pid, formlist)
-    print(ass)
-    
-    
+    # DO NOT LEAVE THIS
+    pid = 50
+    codies = fetch_qr_codes(url, aut, pid, formlist, indir)
     

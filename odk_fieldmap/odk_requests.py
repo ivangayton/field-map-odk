@@ -212,23 +212,25 @@ def publish_form(base_url, aut, pid, fid):
            f'{fid}/draft/publish?version=yeahgo')
     return requests.post(url, auth=aut)
 
-def qr_code():
+def qr_code(base_url, aut, pid, pname, form, token, outdir):
     """
     Based on the info at 
     https://docs.getodk.org/collect-import-export/
     """
-    general = {
-        "form_update_mode": "match_exactly",
-        "autosend": "wifi_and_cellular",
-        "basemap_source": "mapbox",
-        }
-    
-    settings = { ... }
+    settings = {"general":
+                {"server_url":f'{base_url}/v1/key/{token}/projects/{pid}',
+                 "form_update_mode":"match_exactly",
+                 "basemap_source": "mapbox",
+                 "autosend":"wifi_and_cellular"},
+                "project":{"name":f'{pname}'},
+                "admin":{}
+    }
     
     qr_data = (b64encode(zlib.compress(json.dumps(settings)
                                        .encode("utf-8"))))
     code = segno.make(qr_data, micro=False)
-    code.save('settings.png', scale=5)
+    outpath = os.path.join(outdir, form)
+    code.save(f'{outpath}.png', scale=5)
 
 def delete_project(base_url, aut, pid):
     """Permanently delete project from an ODK Central server. Probably don't."""
