@@ -279,7 +279,7 @@ def generate_qr_data_dict(base_url, aut, pid, admin={}, general=general):
 
 
 # Test QR settings data
-# See here to see all the possible settings: https://docs.getodk.org/collect-import-export/?highlight=configur
+# See here to see all the possible settings: https://docs.getodk.org/collect-import-export/?highlight=configure
 
 
 if __name__ == '__main__':
