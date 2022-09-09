@@ -7,7 +7,9 @@
 {% endblock %}
 
 {% block content %}
-  <p id="quick_view">Base dir is: example_files/{{project['title']}}</p>
+  {% if msg %}
+    <p id="quick_view">{{msg}}</p>
+  {% endif %}
 
   <div id="map"></div>
 
@@ -17,6 +19,26 @@
       value="{{ request.form['task'] }}" required>
     <input type="submit" value="Select">
   </form> -->
+
+  <!-- <h1>Project tasks</h1>
+  {% for task in tasks %}
+    <article class="project">
+      <header>
+        <div>
+          <!-- TODO remove hardcoding -->
+          <h2>Task {{ task['task_number'] }}</h2>
+          {% if task['in_progress'] %}
+            <div class="about">by {{ task['username'] }} on {{ task['last_selected'].strftime('%Y-%m-%d') }}</div>
+          {% endif %}
+        </div>
+      </header>
+    </article>
+    {% if not loop.last %}
+      <hr>
+    {% endif %}
+  {% endfor %} -->
+
+
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
    integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
@@ -29,6 +51,7 @@
 
   <script>
     function hardcodedMap() {
+
       const map = L.map("map").setView([-6.785568, 39.261278], 13);
       const osm = L.tileLayer(
         "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -38,6 +61,8 @@
             '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         }
       ).addTo(map);
+
+
 
       // area_geojson = "{{url_for('static', filename='example_files/Partial_Mikocheni/Mikocheni.geojson')}}";
       grid_geojson = "{{url_for('static', filename='example_files/'+project['title']+'/'+project['title']+'_dumb_grid.geojson')}}";
@@ -58,20 +83,30 @@
         // hacky way to combine javascript and flask logic
         final_qrcode_src = qrcode_src.replace("42.png", ""+number+".png");
 
-        layer.bindPopup(
-          "<h1>Task "+number+"</h1>"+
-          "<p>To start field mapping, scan the QR Code using ODK Collect and click 'Assign me this task', so that no one duplicates your work! If you are on your mobile device, select 'Download QR Code'.</p>"+
-          "<img src='"+final_qrcode_src+"' alt='' height='150px' width='150px'>"+
-          "<form method='post'>"+
-            "<input style=\"display:none;\" name='taskid' id='taskid'"+
-              "value='"+number+"' required>"+
-            "<label for='id_"+number+"'>Download QR Code</label>"+
-            "<input type='checkbox' id='id_"+number+"'"+ "name='select_extras' value='download'>"+
-            "<input type='submit' value='Assign me this Task'>"+
+        if ({{in_progress}}.includes(number)) {
+          layer.setStyle({fillColor:'purple',color: 'black',weight:2,fillOpacity:0.8});
+        //
+        //   {% if g.user['id'] == project['author_id'] %}
+        //     <a class="action" href="{{ url_for('project.update', id=project['id']) }}">Edit</a>
+        //   {% endif %}
+        }
+        else {
 
-          "</form>"
+          layer.bindPopup(
+            "<h1>Task "+number+"</h1>"+
+            "<p>To start field mapping, scan the QR Code using ODK Collect and click 'Assign me this task', so that no one duplicates your work! If you are on your mobile device, select 'Download QR Code'.</p>"+
+            "<img src='"+final_qrcode_src+"' alt='' height='150px' width='150px'>"+
+            "<form method='post'>"+
+              "<input style=\"display:none;\" name='tasknum' id='tasknum'"+
+                "value='"+number+"' required>"+
+              "<label for='id_"+number+"'>Download QR Code</label>"+
+              "<input type='checkbox' id='id_"+number+"'"+ "name='select_extras' value='download'>"+
+              "<input type='submit' value='Assign me this Task'>"+
 
-        )
+            "</form>"
+
+          )
+        }
       }
     }
 

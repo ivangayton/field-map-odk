@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from flask import (
     Blueprint, flash, g, redirect, render_template, request, url_for, session
 )
@@ -85,16 +86,23 @@ def create_tasks(db, title, first, last):
 
 def get_tasks_for_project(project_id):
     tasks = get_db().execute(
-        'SELECT id, task_number, in_progress, title'
+        'SELECT t.id, task_number, in_progress, last_selected, title'
         ' FROM task t JOIN project p ON t.[project_id] = p.id'
         ' WHERE t.[project_id] = ?',
-        (id,)
+        (project_id,)
     ).fetchall()
     return tasks
 
+def get_in_progress_task_numbers(tasks):
+    in_progress = []
+    for task in tasks.values():
+        if task['in_progress']:
+            in_progress.append(task['task_number'])
+    return in_progress
+
 def get_tasks_for_user(user_id):
     tasks = get_db().execute(
-        'SELECT t.id, task_number, in_progress, title'
+        'SELECT t.id, task_number, project_id, last_selected, in_progress, title'
         ' FROM task t JOIN project p ON t.[project_id] = p.id'
         ' WHERE t.[task_doer] = ?',
         (user_id,)
@@ -144,35 +152,54 @@ def get_project(id, check_author=True):
 def map(id):
     project = get_project(id, False)
 
+    tasks = {}
+    task_list = get_tasks_for_project(project['id'])
+    for task in task_list:
+        tasks[task['task_number']]=task
+
+    msg = ""
+
     if request.method == 'POST':
-        task_id = request.form['taskid']
+        task_number = request.form['tasknum']
         error = None
 
-        if not task_id:
-            error = 'Task ID cannot be blank. Please select task again.'
+        msg = "Attempted post with task number: "+task_number
+
+        if not task_number:
+            error = 'Task Number cannot be blank. Please select task again.'
 
             if error is not None:
+                msg = error
                 flash(error)
-            else:
-                # db.execute(
-                #     'UPDATE task SET in_progress = ?, task_doer = ?, last_selected = ?'
-                #     ' WHERE id = ?',
-                #     (1, session.get('user_id'), datetime.now(), id)
-                # )
-                # db.commit()
+        else:
+            db = get_db()
+            matching_tasks = db.execute(
+                'SELECT id, task_number FROM task'
+                ' WHERE project_id = ? AND task_number = ?',
+                (id, task_number)).fetchall()
 
-                extra_actions = request.form.getlist('select_extras')
-                flash(extra_actions)
-                if extra_actions.contains('download'):
-                    new_filename = project['title']+"_task"+task_id+"_qrcode.gif"
-                    full_path = url_for('static', filename='example_files/Partial_Mikocheni/QR_codes/Mikocheni_buildings_198.gif')
-                    flash("Downloading: "+full_path)
-                    return send_from_directory(full_path, filename, as_attachment=True)
-                else:
-                    flash("No download requested.")
-                return redirect(url_for('project.index'))
+            msg = matching_tasks
 
-    return render_template('project/map.html', project=project)
+            db.execute(
+                'UPDATE task SET in_progress = ?, task_doer = ?, last_selected = ?'
+                ' WHERE project_id = ? AND task_number = ?',
+                (1, session.get('user_id'), datetime.now(), id, task_number)
+            )
+            db.commit()
+
+                # extra_actions = request.form.getlist('select_extras')
+                # flash(extra_actions)
+                # if extra_actions.contains('download'):
+                #     new_filename = project['title']+"_task"+task_id+"_qrcode.gif"
+                #     full_path = url_for('static', filename='example_files/Partial_Mikocheni/QR_codes/Mikocheni_buildings_198.gif')
+                #     flash("Downloading: "+full_path)
+                #     return send_from_directory(full_path, filename, as_attachment=True)
+                # else:
+                #     flash("No download requested.")
+                # return redirect(url_for('project.index'))
+    in_progress = get_in_progress_task_numbers(tasks)
+
+    return render_template('project/map.html', project=project, tasks=tasks, in_progress=in_progress, msg=in_progress)
 
 
 

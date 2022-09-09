@@ -15,7 +15,7 @@
         <div>
           <!-- TODO remove hardcoding -->
           <h2>Task {{ task['task_number'] }}</h2>
-          <div class="about">by {{ task['username'] }} on {{ task['created'].strftime('%Y-%m-%d') }}</div>
+          <div class="about">was selected by {{ task['username'] }} on {{ task['last_selected'].strftime('%Y-%m-%d') }}</div>
         </div>
         <a class="action" href="{{ url_for('project.map', id=task['project_id'])}}">See Project</a>
       </header>
