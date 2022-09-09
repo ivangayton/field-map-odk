@@ -136,3 +136,8 @@ input[type=submit] {
 #map {
   height: 500px;
 }
+
+.highlighted-action {
+  margin-top: 45px;
+  color: black;
+}

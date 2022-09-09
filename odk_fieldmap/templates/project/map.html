@@ -7,9 +7,9 @@
 {% endblock %}
 
 {% block content %}
-  {% if msg %}
+  <!-- {% if msg %}
     <p id="quick_view">{{msg}}</p>
-  {% endif %}
+  {% endif %} -->
 
   <div id="map"></div>
 
@@ -84,11 +84,27 @@
         final_qrcode_src = qrcode_src.replace("42.png", ""+number+".png");
 
         if ({{in_progress}}.includes(number)) {
-          layer.setStyle({fillColor:'purple',color: 'black',weight:2,fillOpacity:0.8});
-        //
-        //   {% if g.user['id'] == project['author_id'] %}
-        //     <a class="action" href="{{ url_for('project.update', id=project['id']) }}">Edit</a>
-        //   {% endif %}
+        // TODO: add check for if this user created this
+          {% if g.user['id'] %}
+            layer.setStyle({fillColor:'blue',color: 'black',weight:2,fillOpacity:0.8});
+
+            layer.bindPopup(
+              "<h1>Task "+number+"</h1>"+
+              "<p>You are responsible for this task.</p>"+
+              "<img src='"+final_qrcode_src+"' alt='' height='150px' width='150px'>"+
+              // "<a class='action' href=''>Task has been completed</a>"+
+              "<form action='{{url_for('project.release', id=project['id']) }}"+ "method='post'>"+
+                "<input style=\"display:none;\" name='tasknum' id='tasknum'"+
+                  "value='"+number+"' required>"+
+                "<input class='danger' type='submit' value='Release' onclick='return confirm(\'Are you sure?\');'>"+
+              "</form>"
+            )
+
+          {% else %}
+            layer.setStyle({fillColor:'purple',color: 'black',weight:2,fillOpacity:0.8});
+
+            layer.bindPopup("<h1>Task "+number+"</h1>")
+          {% endif %}
         }
         else {
 
@@ -104,7 +120,6 @@
               "<input type='submit' value='Assign me this Task'>"+
 
             "</form>"
-
           )
         }
       }

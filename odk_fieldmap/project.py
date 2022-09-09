@@ -19,7 +19,7 @@ def index():
         ' ORDER BY created DESC'
     ).fetchall()
 
-    if session['user_id']:
+    if session.get('user_id'):
         tasks = get_tasks_for_user(session['user_id'])
         return render_template('project/index.html', tasks=tasks, projects=projects)
     return render_template('project/index.html', projects=projects)
@@ -124,6 +124,7 @@ def get_project(id, check_author=True):
 
     return project
 
+
 # most recent attempt to download: https://gist.github.com/redlotus/3138bd661ceb02abf1f6
 # def get_file_params(full_path, filename):
 #     filepath = os.path.abspath(current_app.root_path)+"/../download/"+filename
@@ -148,6 +149,21 @@ def get_project(id, check_author=True):
 #
 # 	return response
 
+# todo: make this work
+def check_for_task_number(request) :
+    task_number = request.form['tasknum']
+    error = None
+
+    msg = "Attempted post with task number: "+task_number
+
+    if not task_number:
+        error = 'Task Number cannot be blank. Please select task again.'
+
+        if error is not None:
+            msg = error
+            flash(error)
+    return task_number
+
 @bp.route('/<int:id>/map', methods=('GET', 'POST'))
 def map(id):
     project = get_project(id, False)
@@ -160,46 +176,44 @@ def map(id):
     msg = ""
 
     if request.method == 'POST':
-        task_number = request.form['tasknum']
-        error = None
+        if session.get('user_id'):
 
-        msg = "Attempted post with task number: "+task_number
+            task_number = check_for_task_number(request)
+            if task_number:
+                db = get_db()
+                matching_tasks = db.execute(
+                    'SELECT id, task_number FROM task'
+                    ' WHERE project_id = ? AND task_number = ?',
+                    (id, task_number)).fetchall()
 
-        if not task_number:
-            error = 'Task Number cannot be blank. Please select task again.'
+                msg = matching_tasks
 
-            if error is not None:
-                msg = error
-                flash(error)
+                db.execute(
+                    'UPDATE task SET in_progress = ?, task_doer = ?, last_selected = ?'
+                    ' WHERE project_id = ? AND task_number = ?',
+                    (1, session.get('user_id'), datetime.now(), id, task_number)
+                )
+                db.commit()
+
+                    # extra_actions = request.form.getlist('select_extras')
+                    # flash(extra_actions)
+                    # if extra_actions.contains('download'):
+                    #     new_filename = project['title']+"_task"+task_id+"_qrcode.gif"
+                    #     full_path = url_for('static', filename='example_files/Partial_Mikocheni/QR_codes/Mikocheni_buildings_198.gif')
+                    #     flash("Downloading: "+full_path)
+                    #     return send_from_directory(full_path, filename, as_attachment=True)
+                    # else:
+                    #     flash("No download requested.")
+                    # return redirect(url_for('project.index'))
+            in_progress = get_in_progress_task_numbers(tasks)
+
+            return render_template('project/map.html', project=project, tasks=tasks, in_progress=in_progress, msg=in_progress)
         else:
-            db = get_db()
-            matching_tasks = db.execute(
-                'SELECT id, task_number FROM task'
-                ' WHERE project_id = ? AND task_number = ?',
-                (id, task_number)).fetchall()
+            return redirect(url_for("auth.login"))
+    else:
+        in_progress = get_in_progress_task_numbers(tasks)
 
-            msg = matching_tasks
-
-            db.execute(
-                'UPDATE task SET in_progress = ?, task_doer = ?, last_selected = ?'
-                ' WHERE project_id = ? AND task_number = ?',
-                (1, session.get('user_id'), datetime.now(), id, task_number)
-            )
-            db.commit()
-
-                # extra_actions = request.form.getlist('select_extras')
-                # flash(extra_actions)
-                # if extra_actions.contains('download'):
-                #     new_filename = project['title']+"_task"+task_id+"_qrcode.gif"
-                #     full_path = url_for('static', filename='example_files/Partial_Mikocheni/QR_codes/Mikocheni_buildings_198.gif')
-                #     flash("Downloading: "+full_path)
-                #     return send_from_directory(full_path, filename, as_attachment=True)
-                # else:
-                #     flash("No download requested.")
-                # return redirect(url_for('project.index'))
-    in_progress = get_in_progress_task_numbers(tasks)
-
-    return render_template('project/map.html', project=project, tasks=tasks, in_progress=in_progress, msg=in_progress)
+        return render_template('project/map.html', project=project, tasks=tasks, in_progress=in_progress, msg=in_progress)
 
 
 
@@ -238,3 +252,33 @@ def delete(id):
     db.execute('DELETE FROM project WHERE id = ?', (id,))
     db.commit()
     return redirect(url_for('project.index'))
+
+@bp.route('/<int:id>/release', methods=('POST',))
+@login_required
+def release(id, task_num):
+    task_number = check_for_task_number(request)
+
+    if task_number is None:
+        abort(404, f"Task number is required.")
+
+    task = check_task_doer(proj_id, task_num)
+    db = get_db()
+    db.execute('DELETE FROM task WHERE id = ?', (task[id],))
+    db.commit()
+    return redirect(url_for('project.index'))
+
+
+def check_task_doer(proj_id, task_num):
+    task = get_db().execute(
+        'SELECT t.id'
+        ' FROM task t'
+        ' WHERE t.proj_id = ? AND t.task_num = ?',
+        (proj_id, task_num)
+    ).fetchone()
+
+    if task is None:
+        abort(404, f"Project id {id} doesn't exist.")
+
+    if check_author and task['task_doer'] != g.user['id']: abort(403)
+
+    return task
