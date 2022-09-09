@@ -54,11 +54,14 @@
       if (feature.properties && feature.properties.id) {
         number = feature.properties.id;
 
-        qrcode_src = "{{url_for('static', filename='example_files/'+project['title']+'/QR_codes/'+project['title']+'_buildings_198.png')}}";
+        qrcode_src = "{{url_for('static', filename='example_files/'+project['title']+'/QR_codes/'+project['title']+'_buildings_42.png')}}";
+        // hacky way to combine javascript and flask logic
+        final_qrcode_src = qrcode_src.replace("42.png", ""+number+".png");
+
         layer.bindPopup(
           "<h1>Task "+number+"</h1>"+
           "<p>To start field mapping, scan the QR Code using ODK Collect and click 'Assign me this task', so that no one duplicates your work! If you are on your mobile device, select 'Download QR Code'.</p>"+
-          "<img src='"+qrcode_src+"' alt='' height='150px' width='150px'>"+
+          "<img src='"+final_qrcode_src+"' alt='' height='150px' width='150px'>"+
           "<form method='post'>"+
             "<input style=\"display:none;\" name='taskid' id='taskid'"+
               "value='"+number+"' required>"+
