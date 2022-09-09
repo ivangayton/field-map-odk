@@ -1,0 +1,4 @@
+include odk_fieldmap/schema.sql
+graft odk_fieldmap/static
+graft odk_fieldmap/templates 
+global-exclude *.pyc
