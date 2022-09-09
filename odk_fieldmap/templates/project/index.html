@@ -8,24 +8,25 @@
 {% endblock %}
 
 {% block content %}
-  <h1>My tasks</h1>
-  {% for task in tasks %}
-    <article class="project">
-      <header>
-        <div>
-          <!-- TODO remove hardcoding -->
-          <h2>Task {{ task['task_number'] }}</h2>
-          <div class="about">by {{ task['username'] }} on {{ task['created'].strftime('%Y-%m-%d') }}</div>
-        </div>
-        <a class="action" href="{{ url_for('project.map', id=task['project_id'])}}">See Project</a>
-      </header>
-    </article>
-    {% if not loop.last %}
-      <hr>
-    {% endif %}
-  {% endfor %}
+  {% if g.user['id'] %}
+    <h1 class='highlighted-action'>My tasks</h1>
+    {% for task in tasks %}
+      <article class="project">
+        <header>
+          <div>
+            <!-- TODO remove hardcoding -->
+            <div class="about">Task {{ task['task_number'] }} was selected by {{ task['username'] }} on {{ task['last_selected'].strftime('%Y-%m-%d') }}</div>
+          </div>
+          <a class="action" href="{{ url_for('project.map', id=task['project_id'])}}">See Project</a>
+        </header>
+      </article>
+      {% if not loop.last %}
+        <hr>
+      {% endif %}
+    {% endfor %}
 
-  <h1>Open Projects</h1>
+    <h1 class='highlighted-action'>Open Projects</h1>
+  {% endif %}
   {% for project in projects %}
     <article class="project">
       <header>
