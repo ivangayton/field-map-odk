@@ -20,7 +20,7 @@ var houseIcon = L.icon({
 //L.marker([-6.785568, 39.261278], {icon: houseIcon}).addTo(map);
 
 
-fetch("data/Mikocheni.geojson")
+fetch("data/Dakar_Sud.geojson")
     .then(function(response) {
       return response.json();
     })
@@ -28,12 +28,12 @@ fetch("data/Mikocheni.geojson")
       L.geoJSON(data).addTo(map);
     })
 
-fetch("data/Mikocheni_dumb_grid.geojson")
+fetch("data/Dakar_Sud_grid.geojson")
     .then(function(response) {
       return response.json();
     })
     .then(function(data) {
-      L.geoJSON(data).addTo(map).bindPopup("<img src=data/QR_codes/Mikocheni_buildings_197.png>");
+      L.geoJSON(data).addTo(map).bindPopup("<img src=data/QR_codes/Dakar_Sud_buildings_197.png>");
     })
 
 
