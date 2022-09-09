@@ -28,8 +28,5 @@ odk2odm_venv/
 # test scripts and files
 test
 
-# Images
-*.png
-
 # emacs
 *~
