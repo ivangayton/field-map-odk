@@ -32,9 +32,11 @@ def get_roads(aoi_file):
     (infilepath, extension) = os.path.splitext(aoi_file)
     extent = get_extent_bbox(aoi_file, extension)
     querystring = (
-        f'[out:json][timeout:200];'
-        f'(wr["highway"]({extent}););'
-        f'out body;>;out body;'
+        f'[out:json][timeout:200];('
+        f'wr["highway"]({extent});'
+        f'wr["waterway"]({extent});'
+        f'wr["railway"]({extent});'
+        f');out body;>;out body;'
     )
     overpass_url = ('https://overpass.kumi.systems'
                     '/api/interpreter')
