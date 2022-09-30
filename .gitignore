@@ -30,3 +30,6 @@ test
 
 # emacs
 *~
+
+# mac
+.DS_Store
