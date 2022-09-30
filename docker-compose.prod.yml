@@ -1,0 +1,42 @@
+version: '3.3'
+
+services:
+  web:
+    build:
+       context: .
+       dockerfile: Dockerfile.prod
+    command: bash -c 'gunicorn --bind 0.0.0.0:5000 manage:app'
+    volumes:
+      - .:/app
+    expose:
+      - 5000
+    environment:
+      - FLASK_APP=odk_fieldmap/__init__.py
+      - FLASK_ENV=production
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flask.rule=Host(`flask-traefik.your-domain.com`)"
+      - "traefik.http.routers.flask.tls=true"
+      - "traefik.http.routers.flask.tls.certresolver=letsencrypt"
+
+  traefik:
+    build:
+      context: ./traefik
+      dockerfile: Dockerfile.traefik
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./traefik-public-certificates:/certificates"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.rule=Host(`dashboard-flask-traefik.your-domain.com`)"
+      - "traefik.http.routers.dashboard.tls=true"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.middlewares=auth"
+      - "traefik.http.middlewares.auth.basicauth.users=testuser:$$apr1$$jIKW.bdS$$eKXe4Lxjgy/rH65wP1iQe1"
+
+volumes:
+  traefik-public-certificates:

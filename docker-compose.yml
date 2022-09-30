@@ -1,0 +1,26 @@
+version: '3.3'
+
+services:
+  web:
+    build: .
+    command: python manage.py run -h 0.0.0.0
+    volumes:
+      - .:/app
+    expose:
+      - 5000
+    environment:
+      - FLASK_APP=odk_fieldmap/__init__.py
+      - FLASK_ENV=development
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flask.rule=Host(`flask.localhost`)"
+
+  # alternative webproxy to nginx
+  traefik:
+    image: traefik:v2.2
+    ports:
+      - 80:80
+      - 8081:8080
+    volumes:
+      - "./traefik/traefik.dev.toml:/etc/traefik/traefik.toml"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
