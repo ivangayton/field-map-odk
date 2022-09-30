@@ -6,6 +6,7 @@ services:
        context: .
        dockerfile: Dockerfile.prod
     command: bash -c 'gunicorn --bind 0.0.0.0:5000 manage:app'
+    restart: always
     volumes:
       - .:/app
     expose:
@@ -23,6 +24,7 @@ services:
     build:
       context: ./traefik
       dockerfile: Dockerfile.traefik
+    restart: always
     ports:
       - 80:80
       - 443:443
