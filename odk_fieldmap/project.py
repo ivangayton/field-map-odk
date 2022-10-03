@@ -1,3 +1,5 @@
+import logging
+from flask import current_app
 import os
 from datetime import datetime
 from flask import (
@@ -6,26 +8,20 @@ from flask import (
 from werkzeug.exceptions import abort
 
 from odk_fieldmap.auth import login_required
-from odk_fieldmap.db import get_db
+from odk_fieldmap.models import (db, Project, Task, User)
 
 bp = Blueprint('project', __name__)
 
+
 @bp.route('/')
 def index():
-    db = get_db()
-    projects = db.execute(
-        'SELECT p.id, title, description, created, author_id, username'
-        ' FROM project p JOIN user u ON p.author_id = u.id'
-        ' ORDER BY created DESC'
-    ).fetchall()
+    projects = Project.query.join(
+        User, Project.author_id == User.id).order_by(Project.created)
 
     if session.get('user_id'):
         tasks = get_tasks_for_user(session['user_id'])
         return render_template('project/index.html', tasks=tasks, projects=projects)
     return render_template('project/index.html', projects=projects)
-
-import logging
-from flask import current_app
 
 
 @bp.route('/create', methods=('GET', 'POST'))
@@ -43,13 +39,15 @@ def create():
         if error is not None:
             flash(error)
         else:
-            db = get_db()
-            db.execute(
-                'INSERT INTO project (title, description, author_id, base_dir)'
-                ' VALUES (?, ?, ?, ?)',
-                (title, description, g.user['id'], f'/example_files/{title}')
+            user_id = g.user['id']
+            project = Project(
+                title=title,
+                description=description,
+                author_id=user_id,
+                base_dir=f'/example_files/{title}',
             )
-            db.commit()
+            db.session.add(project)
+            db.session.commit()
 
             # REMOVE LATER
             startingtask = int(request.form['startingtask'])
@@ -60,13 +58,10 @@ def create():
 
     return render_template('project/create.html')
 
+
 def create_tasks(db, title, first, last):
     # this has a bug if project name is the same
-    project = db.execute(
-        'SELECT id, title'
-        ' FROM project WHERE title = ?',
-        (title,)
-    ).fetchone()
+    project = db.session.query(Project).where(Project.title == title).first()
 
     error = None
     if not project:
@@ -77,21 +72,20 @@ def create_tasks(db, title, first, last):
 
     task_numbers = range(first, last+1)
     for num in task_numbers:
-        db.execute(
-            'INSERT INTO task (task_number, project_id)'
-            ' VALUES (?, ?)',
-            (num, project['id'], )
+        task = Task(
+            task_number=num,
+            project_id=project['id']
         )
-    db.commit()
+        db.session.add(task)
+    db.session.commit()
+
 
 def get_tasks_for_project(project_id):
-    tasks = get_db().execute(
-        'SELECT t.id, task_number, in_progress, last_selected, title'
-        ' FROM task t JOIN project p ON t.[project_id] = p.id'
-        ' WHERE t.[project_id] = ?',
-        (project_id,)
-    ).fetchall()
+    tasks = db.session.query(Task).join(
+        Project, Task.project_id == Project.id).where(Project.id == project_id)
+
     return tasks
+
 
 def get_in_progress_task_numbers(tasks):
     in_progress = []
@@ -100,27 +94,22 @@ def get_in_progress_task_numbers(tasks):
             in_progress.append(task['task_number'])
     return in_progress
 
+
 def get_tasks_for_user(user_id):
-    tasks = get_db().execute(
-        'SELECT t.id, task_number, project_id, last_selected, in_progress, title'
-        ' FROM task t JOIN project p ON t.[project_id] = p.id'
-        ' WHERE t.[task_doer] = ?',
-        (user_id,)
-    ).fetchall()
+    tasks = db.session.query(Task).join(
+        Project, Task.project_id == Project.id).where(Task.task_doer == user_id)
     return tasks
 
+
 def get_project(id, check_author=True):
-    project = get_db().execute(
-        'SELECT p.id, title, description, created, author_id, username'
-        ' FROM project p JOIN user u ON p.author_id = u.id'
-        ' WHERE p.id = ?',
-        (id,)
-    ).fetchone()
+    project = db.session.query(Project).join(
+        User, Project.author_id == User.id).where(Project.id == id).first()
 
     if project is None:
         abort(404, f"Project id {id} doesn't exist.")
 
-    if check_author and project['author_id'] != g.user['id']: abort(403)
+    if check_author and project['author_id'] != g.user['id']:
+        abort(403)
 
     return project
 
@@ -150,7 +139,7 @@ def get_project(id, check_author=True):
 # 	return response
 
 # todo: make this work
-def check_for_task_number(request) :
+def check_for_task_number(request):
     task_number = request.form['tasknum']
     error = None
 
@@ -164,6 +153,7 @@ def check_for_task_number(request) :
             flash(error)
     return task_number
 
+
 @bp.route('/<int:id>/map', methods=('GET', 'POST'))
 def map(id):
     project = get_project(id, False)
@@ -171,7 +161,7 @@ def map(id):
     tasks = {}
     task_list = get_tasks_for_project(project['id'])
     for task in task_list:
-        tasks[task['task_number']]=task
+        tasks[task['task_number']] = task
 
     msg = ""
 
@@ -180,12 +170,8 @@ def map(id):
 
             task_number = check_for_task_number(request)
             if task_number:
-                db = get_db()
-                matching_tasks = db.execute(
-                    'SELECT id, task_number FROM task'
-                    ' WHERE project_id = ? AND task_number = ?',
-                    (id, task_number)).fetchall()
-
+                matching_tasks = db.query(Task).where(
+                    Task.project_id == id, Task.task_number == task_number)
                 msg = matching_tasks
 
                 db.execute(
@@ -195,16 +181,16 @@ def map(id):
                 )
                 db.commit()
 
-                    # extra_actions = request.form.getlist('select_extras')
-                    # flash(extra_actions)
-                    # if extra_actions.contains('download'):
-                    #     new_filename = project['title']+"_task"+task_id+"_qrcode.gif"
-                    #     full_path = url_for('static', filename='example_files/Partial_Mikocheni/QR_codes/Mikocheni_buildings_198.gif')
-                    #     flash("Downloading: "+full_path)
-                    #     return send_from_directory(full_path, filename, as_attachment=True)
-                    # else:
-                    #     flash("No download requested.")
-                    # return redirect(url_for('project.index'))
+                # extra_actions = request.form.getlist('select_extras')
+                # flash(extra_actions)
+                # if extra_actions.contains('download'):
+                #     new_filename = project['title']+"_task"+task_id+"_qrcode.gif"
+                #     full_path = url_for('static', filename='example_files/Partial_Mikocheni/QR_codes/Mikocheni_buildings_198.gif')
+                #     flash("Downloading: "+full_path)
+                #     return send_from_directory(full_path, filename, as_attachment=True)
+                # else:
+                #     flash("No download requested.")
+                # return redirect(url_for('project.index'))
             in_progress = get_in_progress_task_numbers(tasks)
 
             return render_template('project/map.html', project=project, tasks=tasks, in_progress=in_progress, msg=in_progress)
@@ -216,7 +202,6 @@ def map(id):
         return render_template('project/map.html', project=project, tasks=tasks, in_progress=in_progress, msg=in_progress)
 
 
-
 @bp.route('/<int:id>/update', methods=('GET', 'POST'))
 @login_required
 def update(id):
@@ -224,7 +209,7 @@ def update(id):
 
     if request.method == 'POST':
         title = request.form['title']
-        body = request.form['description']
+        desc = request.form['description']
         error = None
 
         if not title:
@@ -233,25 +218,26 @@ def update(id):
         if error is not None:
             flash(error)
         else:
-            db = get_db()
-            db.execute(
-                'UPDATE project SET title = ?, description = ?'
-                ' WHERE id = ?',
-                (title, body, id)
-            )
-            db.commit()
+            project = db.session.query(Project).where(Project.id == id).first()
+            project.title = title
+            project.description = desc
+            db.session.commit()
+
             return redirect(url_for('project.index'))
 
     return render_template('project/update.html', project=project)
+
 
 @bp.route('/<int:id>/delete', methods=('POST',))
 @login_required
 def delete(id):
     get_project(id)
-    db = get_db()
-    db.execute('DELETE FROM project WHERE id = ?', (id,))
+    project = db.session.query(Project).where(Project.id == id).first()
+    db.session.delete(project)
     db.commit()
+
     return redirect(url_for('project.index'))
+
 
 @bp.route('/<int:id>/release', methods=('POST',))
 @login_required
@@ -262,23 +248,21 @@ def release(id, task_num):
         abort(404, f"Task number is required.")
 
     task = check_task_doer(proj_id, task_num)
-    db = get_db()
-    db.execute('DELETE FROM task WHERE id = ?', (task[id],))
+    task = db.session.query(Task).where(Task.id == id).first()
+    db.session.delete(task)
     db.commit()
+
     return redirect(url_for('project.index'))
 
 
 def check_task_doer(proj_id, task_num):
-    task = get_db().execute(
-        'SELECT t.id'
-        ' FROM task t'
-        ' WHERE t.proj_id = ? AND t.task_num = ?',
-        (proj_id, task_num)
-    ).fetchone()
+    task = db.session.query(Task).where(
+        Task.project_id == proj_id, Task.task_number == task_num).first()
 
     if task is None:
         abort(404, f"Project id {id} doesn't exist.")
 
-    if check_author and task['task_doer'] != g.user['id']: abort(403)
+    if check_author and task['task_doer'] != g.user['id']:
+        abort(403)
 
     return task

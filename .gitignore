@@ -33,3 +33,6 @@ test
 
 # mac
 .DS_Store
+
+# ignore settings
+.env

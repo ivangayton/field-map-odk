@@ -5,7 +5,7 @@ services:
     build:
        context: .
        dockerfile: Dockerfile.prod
-    command: bash -c 'gunicorn --bind 0.0.0.0:5000 manage:app'
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; gunicorn --bind 0.0.0.0:5000 manage:app'
     restart: always
     volumes:
       - .:/app
@@ -13,10 +13,9 @@ services:
       - 5000
     environment:
       - FLASK_APP=odk_fieldmap/__init__.py
-      - FLASK_ENV=production
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.flask.rule=Host(`flask-traefik.your-domain.com`)"
+      - "traefik.http.routers.flask.rule=Host(`${WEB_DOMAIN}`)"
       - "traefik.http.routers.flask.tls=true"
       - "traefik.http.routers.flask.tls.certresolver=letsencrypt"
 
@@ -33,12 +32,12 @@ services:
       - "./traefik-public-certificates:/certificates"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`dashboard-flask-traefik.your-domain.com`)"
+      - "traefik.http.routers.dashboard.rule=Host(`${METRICS_DOMAIN}`)"
       - "traefik.http.routers.dashboard.tls=true"
       - "traefik.http.routers.dashboard.tls.certresolver=letsencrypt"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.middlewares=auth"
-      - "traefik.http.middlewares.auth.basicauth.users=testuser:$$apr1$$jIKW.bdS$$eKXe4Lxjgy/rH65wP1iQe1"
+      - "traefik.http.middlewares.auth.basicauth.users=${METRICS_LOGIN}"
 
 volumes:
   traefik-public-certificates:
