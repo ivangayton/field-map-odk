@@ -7,6 +7,7 @@ from config import config
 
 migrate = Migrate()
 
+
 def create_app(config_name=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=False)
