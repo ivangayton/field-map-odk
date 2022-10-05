@@ -37,7 +37,6 @@ def test_author_required(app, client, auth):
     auth.login()
     # current user can't modify other user's post
     t = client.post('/1/update')
-    print(t, " <<<<<<<<<<<<<<<<<<<<<<<<")
     assert t.status_code == 403
     assert client.post('/1/delete').status_code == 403
     # current user doesn't see edit link
