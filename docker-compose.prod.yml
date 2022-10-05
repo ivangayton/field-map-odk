@@ -18,6 +18,17 @@ services:
       - "traefik.http.routers.flask.rule=Host(`${WEB_DOMAIN}`)"
       - "traefik.http.routers.flask.tls=true"
       - "traefik.http.routers.flask.tls.certresolver=letsencrypt"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:14-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
 
   traefik:
     build:
@@ -41,3 +52,4 @@ services:
 
 volumes:
   traefik-public-certificates:
+  postgres_data_prod:
