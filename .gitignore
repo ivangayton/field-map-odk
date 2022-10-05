@@ -27,6 +27,7 @@ odk2odm_venv/
 
 # test scripts and files
 test
+db.sqlite3
 
 # emacs
 *~

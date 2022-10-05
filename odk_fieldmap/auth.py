@@ -4,6 +4,7 @@ from flask import (
     Blueprint, flash, g, redirect, render_template, request, session, url_for
 )
 from werkzeug.security import check_password_hash, generate_password_hash
+from sqlalchemy import exc
 from odk_fieldmap.models import (db, User)
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -29,7 +30,7 @@ def register():
                 )
                 db.session.add(user)
                 db.session.commit()
-            except db.IntegrityError:
+            except exc.IntegrityError:
                 error = f"User {username} is already registered."
             else:
                 return redirect(url_for("auth.login"))
@@ -71,7 +72,6 @@ def logout():
 @bp.before_app_request
 def load_logged_in_user():
     user_id = session.get('user_id')
-
     if user_id is None:
         g.user = None
     else:

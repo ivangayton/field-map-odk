@@ -179,7 +179,7 @@ def map(id):
                     ' WHERE project_id = ? AND task_number = ?',
                     (1, session.get('user_id'), datetime.now(), id, task_number)
                 )
-                db.commit()
+                db.session.commit()
 
                 # extra_actions = request.form.getlist('select_extras')
                 # flash(extra_actions)
@@ -234,7 +234,7 @@ def delete(id):
     get_project(id)
     project = db.session.query(Project).where(Project.id == id).first()
     db.session.delete(project)
-    db.commit()
+    db.session.commit()
 
     return redirect(url_for('project.index'))
 

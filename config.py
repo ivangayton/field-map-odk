@@ -4,7 +4,7 @@ from pathlib import Path
 
 class BaseConfig:
     """Base configuration"""
-    BASE_DIR = Path(__file__).parent.parent
+    BASE_DIR = Path(__file__).parent
 
     TESTING = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -22,7 +22,14 @@ class ProductionConfig(BaseConfig):
     DEBUG = False
 
 
+class TestConfig(BaseConfig):
+    """Production configuration"""
+    DEBUG = True
+    TESTING = True
+
+
 config = {
     "development": DevelopmentConfig,
     "production": ProductionConfig,
+    "testing": TestConfig,
 }

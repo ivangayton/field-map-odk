@@ -1,17 +1,17 @@
 import pytest
 from flask import g, session
 from odk_fieldmap.db import get_db
+from odk_fieldmap.models import (User)
+
 
 def test_register(client, app):
     assert client.get('/auth/register').status_code == 200
     response = client.post(
         '/auth/register', data={'username': 'a', 'password': 'a'}
     )
-    assert response.headers["Location"] == "/auth/login"
+    assert response.headers["Location"] == "http://localhost/auth/login"
     with app.app_context():
-        assert get_db().execute(
-            "SELECT * FROM user WHERE username = 'a'",
-        ).fetchone() is not None
+        assert get_db().session.query(User).where(User.username == 'a').first() is not None
 
 @pytest.mark.parametrize(('username', 'password', 'message'), (
     ('', '', b'Username is required.'),
@@ -28,7 +28,7 @@ def test_register_validate_input(client, username, password, message):
 def test_login(client, auth):
     assert client.get('/auth/login').status_code == 200
     response = auth.login()
-    assert response.headers["Location"] == "/"
+    assert response.headers["Location"] == "http://localhost/"
 
     with client:
         client.get('/')
