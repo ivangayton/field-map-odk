@@ -14,11 +14,11 @@ Update the .env file with the desired settings.
 
 Open tty to container
 
-	docker attach field-map-odk-web-1
+    docker attach field-map-odk-web-1
 
 Add debug line in code
 
-	import pdb;pdb.set_trace()
+    import pdb;pdb.set_trace()
 
 When this line is reached in the code then the attached tty window will 
 become interactive with pdb.
