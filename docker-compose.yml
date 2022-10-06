@@ -8,6 +8,8 @@ services:
       - .:/app
     expose:
       - 5000
+    stdin_open: true # for debugging
+    tty: true # for debugging
     environment:
       - FLASK_APP=odk_fieldmap/__init__.py
       - FLASK_ENV=${FLASK_ENV}
