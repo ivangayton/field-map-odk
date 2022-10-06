@@ -23,6 +23,10 @@ Add debug line in code
 When this line is reached in the code then the attached tty window will 
 become interactive with pdb.
 
+Access database (psql):
+
+    docker exec -it field-map-odk-db-1 psql -U fmtm fmtm
+
 ## Production
 
 ### Config:
