@@ -170,7 +170,7 @@ def map(id):
 
             task_number = check_for_task_number(request)
             if task_number:
-                matching_tasks = db.query(Task).where(
+                matching_tasks = db.session.query(Task).where(
                     Task.project_id == id, Task.task_number == task_number)
                 msg = matching_tasks
 
