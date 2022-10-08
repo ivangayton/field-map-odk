@@ -10,6 +10,11 @@ Update the .env file with the desired settings.
 
     docker compose up --build
 
+#### To put it in the background:
+
+    docker compose up --build -d
+ 
+
 ### Debugging
 
 Open tty to container
@@ -18,14 +23,22 @@ Open tty to container
 
 Add debug line in code
 
-    import pdb;pdb.set_trace()
+    import ipdb;ipdb.set_trace()
 
 When this line is reached in the code then the attached tty window will 
-become interactive with pdb.
+become interactive with ipdb.
 
 Access database (psql):
 
     docker exec -it field-map-odk-db-1 psql -U fmtm fmtm
+
+Debugging commands
+
+    help
+
+To get out of debugging
+
+    CTRL + D
 
 ## Production
 
@@ -47,3 +60,11 @@ Update the .env file with the desired settings.
 
     pip install -r odk_fieldmap/requirements.txt
     python -m pytest
+
+## Troubleshooting
+
+    # list all containers
+    docker ps -a
+
+    # turns everything off
+    docker compose down
