@@ -1,4 +1,7 @@
+from email.policy import default
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Enum
+import enum
 
 db = SQLAlchemy()
 
@@ -43,25 +46,33 @@ class Project(db.Model):
         return self.__dict__[field]
 
 
+class TaskStatus(enum.Enum):
+    available = "Available for mapping"
+    unavailable = "Unavailable"
+    ready_for_validation = "Ready for Validation"
+
+    def __str__(self):
+        return self.value
+
+
 class Task(db.Model):
 
     __tablename__ = "tasks"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    task_number = db.Column(db.Integer, unique=False, nullable=False)
+    feature_id = db.Column(db.Integer, unique=False, nullable=False)
     project_id = db.Column(db.Integer, unique=False, nullable=False)
     created = db.Column(db.TIMESTAMP, nullable=False,
                         server_default=db.func.now())
-    in_progress = db.Column(db.Integer, unique=False,
-                            nullable=False, default=0)
+    status = db.Column(Enum(TaskStatus), nullable=False, default=TaskStatus.available)
     task_doer = db.Column(db.Integer)
     last_selected = db.Column(db.TIMESTAMP, server_default=db.func.now())
 
     db.ForeignKeyConstraint(['project_id'], ['projects.id'])
     db.ForeignKeyConstraint(['task_doer'], ['users.id'])
 
-    def __init__(self, task_number, project_id, *args, **kwargs):
-        self.task_number = task_number
+    def __init__(self, feature_id, project_id, *args, **kwargs):
+        self.feature_id = feature_id
         self.project_id = project_id
 
     def __getitem__(self, field):
