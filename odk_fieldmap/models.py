@@ -1,7 +1,8 @@
+import enum
 from email.policy import default
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Enum
-import enum
 
 db = SQLAlchemy()
 
@@ -34,7 +35,7 @@ class Project(db.Model):
     description = db.Column(db.String(256), nullable=False)
     base_dir = db.Column(db.String(128))
 
-    db.ForeignKeyConstraint(['author_id'], ['users.id'])
+    db.ForeignKeyConstraint(["author_id"], ["users.id"])
 
     def __init__(self, title, description, author_id, *args, **kwargs):
         self.title = title
@@ -64,12 +65,13 @@ class Task(db.Model):
     project_id = db.Column(db.Integer, unique=False, nullable=False)
     created = db.Column(db.TIMESTAMP, nullable=False,
                         server_default=db.func.now())
-    status = db.Column(Enum(TaskStatus), nullable=False, default=TaskStatus.available)
+    status = db.Column(Enum(TaskStatus), nullable=False,
+                       default=TaskStatus.available)
     task_doer = db.Column(db.Integer)
     last_selected = db.Column(db.TIMESTAMP, server_default=db.func.now())
 
-    db.ForeignKeyConstraint(['project_id'], ['projects.id'])
-    db.ForeignKeyConstraint(['task_doer'], ['users.id'])
+    db.ForeignKeyConstraint(["project_id"], ["projects.id"])
+    db.ForeignKeyConstraint(["task_doer"], ["users.id"])
 
     def __init__(self, feature_id, project_id, *args, **kwargs):
         self.feature_id = feature_id

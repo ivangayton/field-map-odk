@@ -12,8 +12,8 @@ class BaseConfig:
         "DATABASE_URL", f"sqlite:///{BASE_DIR}/db.sqlite3")
     STATIC_FOLDER = os.environ.get(
         "PROJECTS_UPLOAD_FOLDER", os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), 
-            "odk_fieldmap","static"))
+            os.path.dirname(os.path.abspath(__file__)),
+            "odk_fieldmap", "static"))
     PROJECTS_UPLOAD_FOLDER_NAME = "projects"
 
 
