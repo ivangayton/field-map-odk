@@ -16,11 +16,11 @@ def init_db(app):
     migrate = Migrate(app, db)
 
 
-@click.command('init-db')
+@click.command("init-db")
 def init_db_command():
     """Clears existing data and creates new tables."""
     init_db()
-    click.echo('Initialized the database.')
+    click.echo("Initialized the database.")
 
 
 def init_app(app):
