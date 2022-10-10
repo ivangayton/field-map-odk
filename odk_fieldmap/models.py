@@ -29,8 +29,7 @@ class Project(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     author_id = db.Column(db.Integer, unique=False, nullable=False)
-    created = db.Column(db.TIMESTAMP, nullable=False,
-                        server_default=db.func.now())
+    created = db.Column(db.TIMESTAMP, nullable=False, server_default=db.func.now())
     title = db.Column(db.String(128), nullable=False)
     description = db.Column(db.String(256), nullable=False)
     base_dir = db.Column(db.String(128))
@@ -63,8 +62,7 @@ class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     feature_id = db.Column(db.Integer, unique=False, nullable=False)
     project_id = db.Column(db.Integer, unique=False, nullable=False)
-    created = db.Column(db.TIMESTAMP, nullable=False,
-                        server_default=db.func.now())
+    created = db.Column(db.TIMESTAMP, nullable=False, server_default=db.func.now())
     status = db.Column(Enum(TaskStatus), nullable=False,
                        default=TaskStatus.available)
     task_doer = db.Column(db.Integer)

@@ -25,8 +25,8 @@ def register():
         if error is None:
             try:
                 user = User(
-                    username=username, password=generate_password_hash(
-                        password)
+                    username=username,
+                    password=generate_password_hash(password)
                 )
                 db.session.add(user)
                 db.session.commit()
