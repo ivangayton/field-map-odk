@@ -1,8 +1,7 @@
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-
 import click
 from flask import current_app, g
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 
 from .models import db
 

@@ -1,7 +1,8 @@
+import enum
 from email.policy import default
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Enum
-import enum
 
 db = SQLAlchemy()
 

@@ -1,11 +1,13 @@
 #!/usr/bin/python3
 
-import sys, os
 import argparse
-import requests
 import json
+import os
 import subprocess
+import sys
 from datetime import datetime
+
+import requests
 
 
 def query(query_string, overpass_url):

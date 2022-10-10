@@ -1,6 +1,8 @@
 #!/usr/bin/python3
-import sys, os
+import os
 import re
+import sys
+
 
 def parse_error(string, version):
     # split the error message into a list of version numbers

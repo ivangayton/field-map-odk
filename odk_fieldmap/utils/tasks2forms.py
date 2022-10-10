@@ -1,6 +1,8 @@
 #!/bin/python3
 
-import sys, os
+import os
+import sys
+
 from openpyxl import load_workbook
 
 

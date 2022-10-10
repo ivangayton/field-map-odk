@@ -2,8 +2,9 @@
 """
 Various utilities for using GDAL in python
 """
-import sys, os
+import os
 import subprocess
+import sys
 
 from osgeo import ogr
 

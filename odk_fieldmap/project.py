@@ -1,25 +1,16 @@
+import json
 import logging
-from flask import current_app
 import os
+import posixpath
+import zipfile
 from datetime import datetime
-from flask import (
-    Blueprint,
-    flash,
-    g,
-    redirect,
-    render_template,
-    request,
-    url_for,
-    session,
-)
+
+from flask import (Blueprint, current_app, flash, g, redirect, render_template,
+                   request, session, url_for)
 from werkzeug.exceptions import abort
 
 from odk_fieldmap.auth import login_required
-from odk_fieldmap.models import db, Project, Task, User
-
-import zipfile
-import json
-import posixpath
+from odk_fieldmap.models import Project, Task, User, db
 
 bp = Blueprint("project", __name__)
 

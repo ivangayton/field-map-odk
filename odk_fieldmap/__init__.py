@@ -1,9 +1,9 @@
 import os
-from flask import Flask
-from flask import render_template
-from flask_migrate import Migrate
-from config import config
 
+from flask import Flask, render_template
+from flask_migrate import Migrate
+
+from config import config
 
 migrate = Migrate()
 

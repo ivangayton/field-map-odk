@@ -1,11 +1,10 @@
 #!/bin/python3
 
-import sys, os
 import json
+import os
+import sys
 
-from geo_utils import get_extent_bbox
-from geo_utils import make_centroids
-from geo_utils import osm_json_to_geojson
+from geo_utils import get_extent_bbox, make_centroids, osm_json_to_geojson
 from overpass import query
 
 

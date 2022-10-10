@@ -1,17 +1,11 @@
 #!/bin/python3
 
-import sys, os
+import os
+import sys
 
-from odk_requests import create_project
-from odk_requests import project_id
-from odk_requests import create_form
-from odk_requests import forms
-from odk_requests import attach_to_form
-from odk_requests import publish_form
-from odk_requests import create_app_user
-from odk_requests import app_users
-from odk_requests import update_role_app_user
-from odk_requests import qr_code
+from odk_requests import (app_users, attach_to_form, create_app_user,
+                          create_form, create_project, forms, project_id,
+                          publish_form, qr_code, update_role_app_user)
 
 
 def get_formlist(indir):

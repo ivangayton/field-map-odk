@@ -44,16 +44,17 @@ r.json()[0]['name']
 
 """
 
-import sys, os
-import requests
-import json
-
-# QR code stuff
-from base64 import b64encode
 import codecs
 import json
-import segno
+import os
+import sys
 import zlib
+# QR code stuff
+from base64 import b64encode
+
+import requests
+
+import segno
 
 
 def projects(base_url, aut):

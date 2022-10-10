@@ -1,4 +1,5 @@
 import pytest
+
 from odk_fieldmap.db import get_db
 from odk_fieldmap.models import Project
 
