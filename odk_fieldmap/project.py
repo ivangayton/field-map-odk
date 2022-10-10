@@ -112,14 +112,18 @@ def save_project_file(request, form_field_name):
     return None
 
 
-def get_task_ids_from_geojson(title):
-    # import ipdb; ipdb.set_trace()
-    project_path = get_project_folder(request.form["title"])
+def get_geojson(title):
+    project_path = get_project_folder(title)
     full_path = os.path.join(project_path, grid_filename)
 
     file = open(full_path)
     data = json.load(file)
 
+    return data
+
+
+def get_task_ids_from_geojson(title):
+    data = get_geojson(title)
     task_ids = []
     for feature in data["features"]:
         task_ids.append(feature["properties"]["id"])
@@ -267,22 +271,28 @@ def map(id):
                 # return redirect(url_for('project.index'))
 
             path = get_relative_project_path(project["title"])
+            geojson = get_geojson(project['title'])
             return render_template(
-                "project/map.html", project=project, project_path=path, tasks=tasks
+                "project/map.html", project=project, project_path=path, tasks=tasks, geojson=geojson,
             )
         else:
             return redirect(url_for("auth.login"))
     else:
         path = get_relative_project_path(project["title"])
+        geojson = get_geojson(project['title'])
         return render_template(
-            "project/map.html", project=project, project_path=path, tasks=tasks
+            "project/map.html", project=project, project_path=path, tasks=tasks, geojson=geojson,
         )
 
 
 def task_by_feature_id(tasks):
     task_dict = {}
     for task in tasks:
-        task_dict[task["feature_id"]] = task
+        task_dict[task["feature_id"]] = {
+            "id": task["id"],
+            "task_doer": task["task_doer"],
+            "status": str(task["status"]),
+        }
     return task_dict
 
 

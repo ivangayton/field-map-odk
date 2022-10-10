@@ -22,6 +22,14 @@ class User(db.Model):
     def __getitem__(self, field):
         return self.__dict__[field]
 
+    @property
+    def serialized(self):
+        """Return object data in serializeable format"""
+        return {
+            'id': self.id,
+            'username': self.username,
+        }
+
 
 class Project(db.Model):
 
@@ -47,7 +55,7 @@ class Project(db.Model):
         return self.__dict__[field]
 
 
-class TaskStatus(enum.Enum):
+class TaskStatus(str, enum.Enum):
     available = "Available for mapping"
     unavailable = "Unavailable"
     ready_for_validation = "Ready for Validation"
@@ -79,3 +87,13 @@ class Task(db.Model):
 
     def __getitem__(self, field):
         return self.__dict__[field]
+
+    @property
+    def serialized(self):
+        """Return object data in serializeable format"""
+        return {
+            'id': self.id,
+            'feature_id': self.feature_id,
+            'project_id': self.project_id,
+            'task_doer': self.task_doer,
+        }
